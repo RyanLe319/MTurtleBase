@@ -1,0 +1,17 @@
+.manga-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-auto-rows: minmax(285px, auto);
+	column-gap: 3rem;
+	row-gap: 1.2rem;
+	margin-top: 100px;
+	height: 100%;
+
+}
+
+@media (max-width: 768px) {
+	.manga-grid {
+		grid-template-columns: 1fr; /* Single column on mobile */
+		grid-auto-rows: minmax(200px, auto); /* Shorter rows on mobile */
+	}
+}

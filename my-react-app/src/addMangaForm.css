@@ -1,0 +1,315 @@
+/* Popup Overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.popup-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Popup Content */
+.popup-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  cursor: auto;
+  pointer-events: auto;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+  border: 2px solid #b0d2f7; /* Your signature blue color */
+  box-shadow: 0 4px 12px rgba(176, 210, 247, 0.3); /* Optional subtle glow */
+}
+
+.popup-overlay.active .popup-content {
+  transform: translateY(0);
+}
+
+/* Close Button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #ff4444;
+}
+
+.close-btn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #b0d2f7;
+  outline: none;
+}
+
+.form-group input.error {
+  border-color: #ff4444;
+}
+
+.error-message {
+  color: #ff4444;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.required {
+  color: #ff4444;
+}
+
+/* Updated Submit Button */
+.submit-btn {
+  background-color: #f0f0f0; /* Light gray when inactive */
+  color: #555;
+  border: 2px solid #ddd; /* Light gray border */
+  border-radius: 4px; /* Match clear button's rounded style */
+  padding: 10px 15px;
+  font-size: 1rem;
+  font-weight: 500;
+  width: 100%;
+  margin-top: 10px;
+  cursor: not-allowed; /* Disabled by default */
+  transition: all 0.3s ease;
+  box-shadow: none;
+}
+
+/* Active state (when title is entered) */
+.submit-btn.active {
+  background-color: transparent; /* Transparent like clear button */
+  color: #555;
+  border-color: #b0d2f7; /* Blue border */
+  cursor: pointer;
+}
+
+/* Hover state (matches clear button) */
+.submit-btn.active:hover {
+  background: rgba(176, 210, 247, 0.1); /* Light blue tint */
+  color: #333;
+  border-color: #8fbde8; /* Darker blue */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+}
+
+/* Active/pressed state */
+.submit-btn.active:active {
+  transform: translateY(1px);
+  background: rgba(176, 210, 247, 0.2);
+  box-shadow: none;
+}
+
+/* Disabled state (during submission) */
+.submit-btn:disabled {
+  background-color: #f5f5f5;
+  color: #aaa;
+  border-color: #e0e0e0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Auto-expanding Textarea */
+.auto-expand-textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  resize: none;
+  min-height: 60px;
+  overflow-y: hidden;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+/* Genre Input Styles */
+.genre-input-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.genre-input-container input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.add-genre-btn {
+  padding: 8px 12px;
+  background-color: #b0d2f7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.3s ease;
+}
+
+.add-genre-btn:hover {
+  background-color: #b0d2f7;
+
+}
+
+.add-genre-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.genre-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.genre-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e0e0e0;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.genre-tag:hover {
+  background-color: #d0d0d0;
+}
+
+.remove-genre-btn {
+  margin-left: 6px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.2s ease;
+}
+
+.remove-genre-btn:hover {
+  color: #ff4444;
+}
+
+.remove-genre-btn:disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* Loading State */
+.submitting-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.error-message.submit-error {
+  margin: 10px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #ff4444;
+}
+
+
+.clear-button {
+  display: block;
+  width: 120px; /* Fixed width for rounded look */
+  padding: 8px 12px;
+  background-color: white; /* Slightly off-white */
+  color: #555;
+  border: 2px solid #b0d2f7; /* Your signature blue */
+  border-radius: 4px; /* Fully rounded ends */
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.clear-button:hover {
+  background: rgba(176, 210, 247, 0.1); /* Light blue tint */
+  color: #333;
+  border-color: #8fbde8; /* Darker blue on hover */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle lift */
+}
+
+.clear-button:active {
+  transform: translateY(1px);
+  background: rgba(176, 210, 247, 0.2);
+  box-shadow: none;
+}
+
+.clear-button:disabled {
+  background-color: #f0f0f0;
+  color: #aaa;
+  border-color: #e0e0e0;
+  cursor: not-allowed;
+}

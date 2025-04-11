@@ -1,0 +1,32 @@
+.home-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+.home-more-button {
+  width: calc(50% - 1.5rem); /* Matches 2-card grid width */
+  max-width: 600px;
+  padding: 1rem;
+  background: transparent; /* No fill */
+  color: #333; /* Your logo blue for text */
+  border: 2px solid #b0d2f7; /* Outline in your logo blue */
+  border-radius: 2px; /* Reduced from 8px for sharper edges */
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: none; /* Removed shadow for outline style */
+}
+
+.home-more-button:hover {
+  background: rgba(176, 210, 247, 0.1); /* 10% opacity of your blue */
+  color: #333; /* Slightly darker blue text on hover */
+  border-color: #8fbde8; /* Slightly darker border on hover */
+}
+
+.home-more-button:active {
+  transform: translateY(1px);
+  background: rgba(176, 210, 247, 0.2); /* Slightly more opaque when pressed */
+}
