@@ -1,0 +1,27 @@
+/* Ensure the footer is a positioning context for absolute children */
+.footer {
+    position: relative; /* This is crucial! */
+  }
+  
+  /* Position the logo absolutely */
+  .footer-logo {
+    position: absolute;
+    top: 50%;           /* Adjust vertical position */
+    left: 50%;          /* Adjust horizontal position */
+    transform: translate(-50%, -50%); /* Centers the logo precisely */
+    /* Add manual adjustments if needed: */
+    margin-left: -10px; 
+    margin-top: 10px; 
+  }
+  
+
+#footer-nav a, #footer-nav .nav-link-btn{
+  color: #6c757d;
+  font-weight: 400;
+}
+
+
+#footer-nav .nav-links a:hover,
+#footer-nav .nav-links button.nav-link-btn:hover {
+    color: #b0d2f7;
+}
