@@ -38,7 +38,7 @@ db.connect()
 });
 
 app.get("/", async (req, res) => {
-	<h1>Hello</h1>
+	res.send("<h1>Hello</h1>");
 })
 
 
