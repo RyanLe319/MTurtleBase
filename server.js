@@ -5,6 +5,8 @@ import pg from "pg"; // PostgreSQL client
 import env from "dotenv"; // Loads environment variables from .env file
 import cors from "cors"; // Handles Cross-Origin Resource Sharing
 import ejs from "ejs"; // Optional: for server-side templating (currently unused here)
+import { lookup } from 'dns/promises';
+
 
 const app = express();
 const port = 10000;
@@ -18,19 +20,44 @@ app.use(express.static("public")); // Serve static files from 'public' folder
 app.use(express.json()); // Parse JSON request bodies
 
 // Setup PostgreSQL client using environment variables
-const db = new pg.Client({
-	connectionString: `postgresql://${process.env.SUPABASE_USER}:${process.env.SUPABASE_PASSWORD}@${process.env.SUPABASE_HOST}:${process.env.SUPABASE_PORT}/${process.env.SUPABASE_DATABASE}?sslmode=require`,
-	family: 4 // Still include this
-  });
-
-// Connect to the database
-db.connect()
-  .then(() => {
-    console.log('Successfully connected to Supabase database');
-  })
-  .catch((err) => {
-    console.error('Failed to connect to Supabase database:', err);
-  });
+// Async function to resolve IPv4 address
+async function getPostgresConfig() {
+	try {
+	  // Force IPv4 DNS resolution
+	  const supabaseIPv4 = await lookup(process.env.SUPABASE_HOST, { family: 4 });
+	  
+	  return {
+		user: process.env.SUPABASE_USER,
+		host: supabaseIPv4.address, // Use resolved IPv4 address
+		database: process.env.SUPABASE_DATABASE,
+		password: process.env.SUPABASE_PASSWORD,
+		port: process.env.SUPABASE_PORT,
+		ssl: { 
+		  rejectUnauthorized: false,
+		  // For better security in production:
+		  // ca: fs.readFileSync('path/to/supabase-ca-cert.pem').toString()
+		},
+		// family: 4, // Not needed since we already resolved IPv4
+	  };
+	} catch (err) {
+	  console.error('DNS resolution failed:', err);
+	  throw err;
+	}
+  }
+  
+  // Initialize database connection asynchronously
+  let db;
+  (async function initDb() {
+	try {
+	  const dbConfig = await getPostgresConfig();
+	  db = new pg.Client(dbConfig);
+	  await db.connect();
+	  console.log('Connected to Supabase via IPv4');
+	} catch (err) {
+	  console.error('Database connection failed:', err);
+	  process.exit(1);
+	}
+  })();
 
 // Route to add a manga to the database
 app.post("/adding-manga", async (req, res) => {
