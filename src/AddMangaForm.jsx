@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./AddMangaForm.css";
+import "./addMangaForm.css";
 
 function AddMangaForm({ isOpen, onClose, onSuccess } ) {
 
