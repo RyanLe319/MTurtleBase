@@ -120,7 +120,7 @@ function AddMangaForm({ isOpen, onClose, onSuccess } ) {
     }
 
     try {
-      const response = await fetch("https://mturtlebase.onrender.com/adding-manga", { 
+      const response = await fetch("https://mturtlebase-1.onrender.com/adding-manga", { 
         method: "POST", 
         headers: {
           "Content-Type": "application/json", // Sets the request header to indicate we're sending JSON data
