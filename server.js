@@ -24,6 +24,7 @@ const db = new pg.Client({
 	database: process.env.SUPABASE_DATABASE,
 	password: process.env.SUPABASE_PASSWORD,
 	port: process.env.SUPABASE_PORT,
+	family: 4,
 });
 
 // Connect to the database
