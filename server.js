@@ -363,6 +363,8 @@ app.patch("/api/manga/:manga_id", async (req, res) => {
 
 // Updated GET endpoint with search functionality
 app.get("/api/manga", async (req, res) => {
+
+	console.log("Incoming request to /api/manga with query:", req.query); // ← Add this
 	try {
 		const {
 			page = 1,
