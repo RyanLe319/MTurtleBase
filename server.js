@@ -19,14 +19,9 @@ app.use(express.json()); // Parse JSON request bodies
 
 // Setup PostgreSQL client using environment variables
 const db = new pg.Client({
-  user: process.env.SUPABASE_USER,
-  host: process.env.SUPABASE_HOST, // Should be "db.[PROJECT-REF].supabase.co"
-  database: process.env.SUPABASE_DATABASE, // Usually "postgres"
-  password: process.env.SUPABASE_PASSWORD,
-  port: process.env.SUPABASE_PORT, // Should be "5432"
-  ssl: { rejectUnauthorized: false }, // Required for Supabase
-  family: 4, // 👈 Correctly forces IPv4
-});
+	connectionString: `postgresql://${process.env.SUPABASE_USER}:${process.env.SUPABASE_PASSWORD}@${process.env.SUPABASE_HOST}:${process.env.SUPABASE_PORT}/${process.env.SUPABASE_DATABASE}?sslmode=require`,
+	family: 4 // Still include this
+  });
 
 // Connect to the database
 db.connect()
