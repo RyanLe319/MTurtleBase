@@ -35,7 +35,12 @@ db.connect()
   })
   .catch((err) => {
     console.error('Failed to connect to Supabase database:', err);
-  });
+});
+
+app.get("/", async (req, res) => {
+	<h1>Hello</h1>
+})
+
 
 // Route to add a manga to the database
 app.post("/adding-manga", async (req, res) => {
