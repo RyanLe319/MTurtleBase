@@ -7,7 +7,7 @@ import cors from "cors"; // Handles Cross-Origin Resource Sharing
 import ejs from "ejs"; // Optional: for server-side templating (currently unused here)
 
 const app = express();
-const port = 3000;
+const port = 10000;
 env.config(); // Load environment variables from .env
 
 // Enable CORS for all routes

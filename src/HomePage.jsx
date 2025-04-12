@@ -26,7 +26,7 @@ function HomePage() {
   useEffect(() => {
     const fetchTotalCount = async () => {
       try {
-        const response = await fetch('https://mturtlebase.onrender.com/api/manga?page=1&limit=1');
+        const response = await fetch('https://mturtlebase.onrender.com/10000/api/manga?page=1&limit=1');
         if (!response.ok) throw new Error("Failed to fetch total count");
         const data = await response.json();
         setTotalMangaCount(data.pagination.total);

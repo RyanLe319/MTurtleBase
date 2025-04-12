@@ -38,7 +38,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const response = await fetch("https://mturtlebase.onrender.com/api/genres");
+        const response = await fetch("https://mturtlebase.onrender.com/10000/api/genres");
         if (!response.ok) throw new Error("Failed to fetch genres");
         const data = await response.json();
         // Extract genre names from response and update state
@@ -57,7 +57,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
     if (trimmedGenre && !genres.includes(trimmedGenre)) {
       try {
         // POST request to add new genre
-        const response = await fetch("https://mturtlebase.onrender.com/api/genres", {
+        const response = await fetch("https://mturtlebase.onrender.com/10000/api/genres", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ genre_name: trimmedGenre }),
@@ -90,7 +90,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
         const encodedGenreName = encodeURIComponent(editingGenre);
         // PUT request to update genre
         const response = await fetch(
-          `https://mturtlebase.onrender.com/api/genres/${encodedGenreName}`, {
+          `https://mturtlebase.onrender.com/10000/api/genres/${encodedGenreName}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ genre_name: trimmedGenre }),
@@ -114,7 +114,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
       const encodedGenreName = encodeURIComponent(genreToDelete);
       // DELETE request to remove genre
       const response = await fetch(
-        `https://mturtlebase.onrender.com/api/genres/${encodedGenreName}`, {
+        `https://mturtlebase.onrender.com/10000/api/genres/${encodedGenreName}`, {
           method: "DELETE",
         });
       if (!response.ok) throw new Error("Failed to delete genre");
