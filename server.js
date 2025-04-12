@@ -17,15 +17,15 @@ app.use(cors());
 app.use(express.static("public")); // Serve static files from 'public' folder
 app.use(express.json()); // Parse JSON request bodies
 
-// Setup PostgreSQL client using environment variables
+// Setup PostgreSQL client using environment variables , change connection to session pooler 
 const db = new pg.Client({
   user: process.env.SUPABASE_USER,
-  host: process.env.SUPABASE_HOST, // Should be "db.[PROJECT-REF].supabase.co"
-  database: process.env.SUPABASE_DATABASE, // Usually "postgres"
+  host: process.env.SUPABASE_HOST, 
+  database: process.env.SUPABASE_DATABASE, 
   password: process.env.SUPABASE_PASSWORD,
-  port: process.env.SUPABASE_PORT, // Should be "5432"
-  ssl: { rejectUnauthorized: false }, // Required for Supabase
-  family: 4, // 👈 Correctly forces IPv4
+  port: process.env.SUPABASE_PORT,
+  ssl: { rejectUnauthorized: false }, 
+  family: 4, //
 });
 
 // Connect to the database
