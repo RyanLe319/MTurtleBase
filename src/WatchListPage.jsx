@@ -26,7 +26,7 @@ function WatchListPage() {
     const fetchTotalPages = async () => {
       try {
         const response = await fetch(
-          `https://mturtlebase-1.onrender.com/api/watchlist?page=1&limit=10`
+          `${BASE_URL}/api/watchlist?page=1&limit=10`
         );
         if (!response.ok) throw new Error("Failed to fetch watchlist");
 
