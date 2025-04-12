@@ -8,6 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 function MangaCard({ manga , onDeleteSuccess }) {
 
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
 

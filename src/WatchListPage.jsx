@@ -4,6 +4,7 @@ import PaginationControls from "./PaginationControls";
 import "./watchListPage.css";
 
 function WatchListPage() {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [currentPage, setCurrentPage] = useState(() => {
     if (localStorage.getItem('reloadingAfterAdd')) {
       localStorage.removeItem('reloadingAfterAdd');

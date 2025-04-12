@@ -11,6 +11,7 @@ function MangaDetails() {
   const [editingField, setEditingField] = useState(null);
   const [tempValue, setTempValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchMangaDetails = async () => {

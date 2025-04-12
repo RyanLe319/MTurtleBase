@@ -33,6 +33,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
   const increment = () => setMinChapters(prev => prev + 1);
   // Function to decrement chapter count (minimum 1)
   const decrement = () => setMinChapters(prev => Math.max(1, prev - 1));
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   // Effect to fetch genres from API when component mounts
   useEffect(() => {

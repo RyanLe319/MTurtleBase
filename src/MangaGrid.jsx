@@ -8,6 +8,7 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const limit = 10;
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchManga = async () => {

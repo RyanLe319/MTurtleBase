@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./homePage.css";
 
 function HomePage() {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(() => {
     if (localStorage.getItem('reloadingAfterAdd')) {
