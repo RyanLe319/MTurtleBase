@@ -50,7 +50,7 @@ function AdvanceSearchPage() {
           ...(filterData.searchQuery && { search: filterData.searchQuery })
         });
 
-        const response = await fetch(`http://localhost:3000/api/manga?${query}`);
+        const response = await fetch(`https://mturtlebase.onrender.com/api/manga?${query}`);
         if (!response.ok) throw new Error("Failed to fetch total pages");
 
         const data = await response.json();
