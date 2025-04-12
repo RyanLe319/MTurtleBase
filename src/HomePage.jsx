@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MangaGrid from "./MangaGrid";
 import { useNavigate } from "react-router-dom";
-import "./HomePage.css";
+import "./homePage.css";
 
 function HomePage() {
   const navigate = useNavigate();
