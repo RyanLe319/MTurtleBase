@@ -1,45 +1,48 @@
-// Import necessary modules
 import express from "express";
-import bodyParser from "body-parser"; // Deprecated in modern Express, but still okay for older setups
-import pg from "pg"; // PostgreSQL client
-import env from "dotenv"; // Loads environment variables from .env file
-import cors from "cors"; // Handles Cross-Origin Resource Sharing
-import ejs from "ejs"; // Optional: for server-side templating (currently unused here)
+import pg from "pg";
+import env from "dotenv";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from 'url';
+
+// Configure paths for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 10000;
-env.config(); // Load environment variables from .env
+const port = process.env.PORT || 10000;
+env.config();
 
-// Enable CORS for all routes
+// Middleware setup - ORDER IS CRUCIAL
 app.use(cors());
+app.use(express.json());
 
-// Middleware setup
-app.use(express.static("public")); // Serve static files from 'public' folder
-app.use(express.json()); // Parse JSON request bodies
-
-// Setup PostgreSQL client using environment variables , change connection to session pooler 
+// Database connection (using Client as requested)
 const db = new pg.Client({
   user: process.env.SUPABASE_USER,
-  host: process.env.SUPABASE_HOST, 
-  database: process.env.SUPABASE_DATABASE, 
+  host: process.env.SUPABASE_HOST,
+  database: process.env.SUPABASE_DATABASE,
   password: process.env.SUPABASE_PASSWORD,
   port: process.env.SUPABASE_PORT,
-  ssl: { rejectUnauthorized: false }, 
-  family: 4, //
+  ssl: { rejectUnauthorized: false },
+  family: 4 // Force IPv4
 });
 
-// Connect to the database
+// Connect to DB
 db.connect()
-  .then(() => {
-    console.log('Successfully connected to Supabase database');
-  })
-  .catch((err) => {
-    console.error('Failed to connect to Supabase database:', err);
-});
+  .then(() => console.log('Connected to Supabase database'))
+  .catch(err => {
+    console.error('Database connection failed:', err);
+    process.exit(1);
+  });
 
+// API ROUTES (must come before static files)
+// ==========================================
+
+// Test route
 app.get("/", async (req, res) => {
-	res.send("<h1>Hello</h1>");
-})
+  res.send("<h1>Hello</h1>");
+});
 
 
 // Route to add a manga to the database
@@ -743,7 +746,15 @@ app.delete("/api/genres/:name", async (req, res) => {
 	}
 });
 
+// Serve static files from the dist directory (Vite output)
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Handle client-side routing, return index.html for all unmatched routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 // Start server
 app.listen(port, () => {
-	console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });
