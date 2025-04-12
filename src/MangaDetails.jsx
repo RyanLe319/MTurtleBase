@@ -15,7 +15,7 @@ function MangaDetails() {
   useEffect(() => {
     const fetchMangaDetails = async () => {
       try {
-        const response = await fetch(`https://mturtlebase.onrender.com/10000/api/manga/${manga_id}`);
+        const response = await fetch(`https://mturtlebase.onrender.com/api/manga/${manga_id}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setManga(data);
@@ -52,7 +52,7 @@ function MangaDetails() {
     
     setIsSaving(true);
     try {
-      const response = await fetch(`https://mturtlebase.onrender.com/10000/api/manga/${manga_id}`, {
+      const response = await fetch(`https://mturtlebase.onrender.com/api/manga/${manga_id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

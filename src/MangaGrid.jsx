@@ -28,8 +28,8 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
         }
 
         const endpoint = isWatchlist
-          ? `https://mturtlebase.onrender.com/10000/api/watchlist?${params}`
-          : `https://mturtlebase.onrender.com/10000/api/manga?${params}`;
+          ? `https://mturtlebase.onrender.com/api/watchlist?${params}`
+          : `https://mturtlebase.onrender.com/api/manga?${params}`;
 
         const response = await fetch(endpoint);
 
@@ -71,8 +71,8 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
       }
 
       const endpoint = isWatchlist
-        ? `https://mturtlebase.onrender.com/10000/api/watchlist?${params}`
-        : `https://mturtlebase.onrender.com/10000/api/manga?${params}`;
+        ? `https://mturtlebase.onrender.com/api/watchlist?${params}`
+        : `https://mturtlebase.onrender.com/api/manga?${params}`;
 
       const response = await fetch(endpoint);
 
