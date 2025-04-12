@@ -24,6 +24,7 @@ const db = new pg.Client({
 	database: process.env.SUPABASE_DATABASE,
 	password: process.env.SUPABASE_PASSWORD,
 	port: process.env.SUPABASE_PORT,
+	ssl: { rejectUnauthorized: false }, // Required for Supabase
 	family: 4,
 });
 
