@@ -7,29 +7,22 @@ A full-stack application for organizing and tracking your manga collection with 
 
 ### Core Functionality
 - 📚 **Manga Management**  
-  - Add, Edit, Delete manga entries  
+  - Manually add, Edit, Delete manga entries  
   - Track reading progress (Last chapter read, Status)  
-  - Personal notes and ratings  
 
 - 🔍 **Advanced Search**  
   - Filter by genres (Action, Romance, Isekai, etc.)
   - Create custom genres 
-  - Search by title, year, chapter count  
-  - Sort by recently added/updated  
+  - Search by title and chapter count  
+  - Sort by criterias
 
 - 🛠 **Database Features**  
   - PostgreSQL relational database  
   - Optimized queries with indexing  
-  - Automatic timestamp tracking  
-
-### Technical Highlights
-- **Real-time Data Sync**  
-  - Integrated with MangaDex API  
-  - Automatic chapter updates  
+  - Automatic timestamp tracking
 
 - **Responsive UI**  
-  - Built with React, Material UI, and Bootstrap 
-  - Mobile-friendly design
+  - Built with React, Material UI, and Bootstrap
     
 ## Tech Stack
 
@@ -40,10 +33,12 @@ A full-stack application for organizing and tracking your manga collection with 
 - CSS Modules for styling  
 
 ### Backend
-- Supabase
 - Node.js + Express.js  
 - PostgreSQL Database  
-- RESTful API endpoints  
+- RESTful API endpoints
+
+### Database:
+- Supabase
 
 ### APIs
 - [MangaDex API](https://api.mangadex.org/docs/) - Primary manga data source  
@@ -88,3 +83,31 @@ erDiagram
         datetime date_added_to_watchlist "When added to watchlist"
         bool is_watched "Optional: flag if watched"
     }
+
+```
+
+### Soon To Come Features:
+
+
+### Features
+
+- 📚 **Manga Management**
+  - Autofill add manga form after entering a title by the use of MangaDex API
+  - Connect the Search bar with the MangaDex API to search for manga outside of the database
+    - For viewing outside source manga information
+    - For another method of adding manga
+  - Rating system
+
+- 🔍 **Advanced Search**
+  - Sort by type of literature (Manga, Manwha, Manhua)
+  - 
+ 
+  
+- **Responsive UI**
+  - 100% Mobile-friendly design (Currently not 100%)
+
+- ### Technical Highlights
+- **Real-time Data Sync**  
+  - Integrated with MangaDex API  
+  - Automatic chapter updates 
+
