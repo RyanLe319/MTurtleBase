@@ -36,6 +36,14 @@ db.connect()
     process.exit(1);
   });
 
+// Add this to your server code (e.g., server.js)
+const axios = require('axios');
+setInterval(() => {
+  axios.get('https://mturtlebase-1.onrender.com/')
+    .then(() => console.log('Pinged to stay alive'))
+    .catch(err => console.log('Ping failed:', err));
+}, 10 * 60 * 1000); // Ping every 10 minutes
+
 // API ROUTES (must come before static files)
 // ==========================================
 
