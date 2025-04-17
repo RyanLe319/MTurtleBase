@@ -33,12 +33,13 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
   const increment = () => setMinChapters(prev => prev + 1);
   // Function to decrement chapter count (minimum 1)
   const decrement = () => setMinChapters(prev => Math.max(1, prev - 1));
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   // Effect to fetch genres from API when component mounts
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/genres");
+        const response = await fetch(`${BASE_URL}/api/genres`);
         if (!response.ok) throw new Error("Failed to fetch genres");
         const data = await response.json();
         // Extract genre names from response and update state
@@ -57,7 +58,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
     if (trimmedGenre && !genres.includes(trimmedGenre)) {
       try {
         // POST request to add new genre
-        const response = await fetch("http://localhost:3000/api/genres", {
+        const response = await fetch(`${BASE_URL}/api/genres`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ genre_name: trimmedGenre }),
@@ -90,7 +91,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
         const encodedGenreName = encodeURIComponent(editingGenre);
         // PUT request to update genre
         const response = await fetch(
-          `http://localhost:3000/api/genres/${encodedGenreName}`, {
+          `${BASE_URL}/api/genres/${encodedGenreName}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ genre_name: trimmedGenre }),
@@ -114,7 +115,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
       const encodedGenreName = encodeURIComponent(genreToDelete);
       // DELETE request to remove genre
       const response = await fetch(
-        `http://localhost:3000/api/genres/${encodedGenreName}`, {
+        `${BASE_URL}/api/genres/${encodedGenreName}`, {
           method: "DELETE",
         });
       if (!response.ok) throw new Error("Failed to delete genre");

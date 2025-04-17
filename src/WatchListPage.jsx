@@ -4,6 +4,7 @@ import PaginationControls from "./PaginationControls";
 import "./watchListPage.css";
 
 function WatchListPage() {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [currentPage, setCurrentPage] = useState(() => {
     if (localStorage.getItem('reloadingAfterAdd')) {
       localStorage.removeItem('reloadingAfterAdd');
@@ -26,7 +27,7 @@ function WatchListPage() {
     const fetchTotalPages = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/watchlist?page=1&limit=10`
+          `${BASE_URL}/api/watchlist?page=1&limit=10`
         );
         if (!response.ok) throw new Error("Failed to fetch watchlist");
 

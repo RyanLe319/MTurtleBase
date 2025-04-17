@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import MangaGrid from "./MangaGrid";
 import { useNavigate } from "react-router-dom";
-import "./HomePage.css";
+import "./homePage.css";
 
 function HomePage() {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  console.log("BASE URL IN HOMEpage: ", BASE_URL);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(() => {
     if (localStorage.getItem('reloadingAfterAdd')) {
@@ -26,7 +28,7 @@ function HomePage() {
   useEffect(() => {
     const fetchTotalCount = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/manga?page=1&limit=1');
+        const response = await fetch(`${BASE_URL}/api/manga?page=1&limit=1`);
         if (!response.ok) throw new Error("Failed to fetch total count");
         const data = await response.json();
         setTotalMangaCount(data.pagination.total);

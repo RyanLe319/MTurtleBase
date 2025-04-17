@@ -7,6 +7,7 @@ import GenreList from "./GenreList";
 import SortBy from "./SortBy";
 
 function AdvanceSearchPage() {
+
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const [currentPage, setCurrentPage] = useState(() => {
@@ -23,6 +24,7 @@ function AdvanceSearchPage() {
     searchQuery: searchParams.get("search") || ""
   });
   const [currentSort, setCurrentSort] = useState('newest');
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     localStorage.setItem('lastMangaPage', currentPage);
@@ -50,7 +52,7 @@ function AdvanceSearchPage() {
           ...(filterData.searchQuery && { search: filterData.searchQuery })
         });
 
-        const response = await fetch(`http://localhost:3000/api/manga?${query}`);
+        const response = await fetch(`${BASE_URL}/api/manga?${query}`);
         if (!response.ok) throw new Error("Failed to fetch total pages");
 
         const data = await response.json();

@@ -8,6 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 function MangaCard({ manga , onDeleteSuccess }) {
 
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -36,7 +37,7 @@ function MangaCard({ manga , onDeleteSuccess }) {
     setError(null);
   
     try {
-      const response = await fetch(`http://localhost:3000/api/manga/${manga.manga_id}`, {
+      const response = await fetch(`${BASE_URL}/api/manga/${manga.manga_id}`, {
         method: 'DELETE'
       });
   

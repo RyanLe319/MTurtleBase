@@ -5,7 +5,7 @@ import {
   KeyboardArrowRight,
   KeyboardDoubleArrowRight 
 } from '@mui/icons-material';
-import './PaginationControls.css';
+import './paginationControls.css';
 
 function PaginationControls({ currentPage, totalPages, onPageChange }) {
   return (

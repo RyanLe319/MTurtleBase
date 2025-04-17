@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./AddMangaForm.css";
+import "./addMangaForm.css";
 
 function AddMangaForm({ isOpen, onClose, onSuccess } ) {
 
@@ -23,6 +23,7 @@ function AddMangaForm({ isOpen, onClose, onSuccess } ) {
   const [isSubmitting, setIsSubmitting] = useState(false); // Tracks the form submission status which is used to disable the form to prevent spam submission
   const popupRef = useRef(null); // Creates a reference to the popup for handling outside clicks
   const [isFormValid, setIsFormValid] = useState(false);
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 
    // useEffect hook to handle closing the form if the user clicks outside or presses Escape
@@ -120,7 +121,7 @@ function AddMangaForm({ isOpen, onClose, onSuccess } ) {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/adding-manga", { 
+      const response = await fetch(`${BASE_URL}/adding-manga`, { 
         method: "POST", 
         headers: {
           "Content-Type": "application/json", // Sets the request header to indicate we're sending JSON data

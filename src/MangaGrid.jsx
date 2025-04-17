@@ -8,6 +8,7 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const limit = 10;
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchManga = async () => {
@@ -28,8 +29,8 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
         }
 
         const endpoint = isWatchlist
-          ? `http://localhost:3000/api/watchlist?${params}`
-          : `http://localhost:3000/api/manga?${params}`;
+          ? `${BASE_URL}/api/watchlist?${params}`
+          : `${BASE_URL}/api/manga?${params}`;
 
         const response = await fetch(endpoint);
 
@@ -71,8 +72,8 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
       }
 
       const endpoint = isWatchlist
-        ? `http://localhost:3000/api/watchlist?${params}`
-        : `http://localhost:3000/api/manga?${params}`;
+        ? `${BASE_URL}/api/watchlist?${params}`
+        : `${BASE_URL}/api/manga?${params}`;
 
       const response = await fetch(endpoint);
 
