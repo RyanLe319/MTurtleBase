@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
 env.config();
 
 // Middleware setup - ORDER IS CRUCIAL
@@ -20,32 +20,21 @@ app.use(express.json());
 
 // Database connection (using Client as requested)
 const db = new pg.Client({
-  user: process.env.SUPABASE_USER,
-  host: process.env.SUPABASE_HOST,
-  database: process.env.SUPABASE_DATABASE,
-  password: process.env.SUPABASE_PASSWORD,
-  port: process.env.SUPABASE_PORT,
-  ssl: { rejectUnauthorized: false },
-  family: 4 // Force IPv4
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT
 });
 
 // Connect to DB
 db.connect()
-  .then(() => console.log('Connected to Supabase database'))
+  .then(() => console.log('Connected to Postgre database'))
   .catch(err => {
     console.error('Database connection failed:', err);
     process.exit(1);
   });
 
-// Keep-alive ping logic
-setInterval(async () => {
-	try {
-	  await axios.get('https://mturtlebase-1.onrender.com');
-	  console.log('Pinged to stay alive');
-	} catch (err) {
-	  console.log('Ping failed:', err);
-	}
-  }, 10 * 60 * 1000); // Ping every 10 minutes
 
 // API ROUTES (must come before static files)
 // ==========================================
@@ -54,6 +43,8 @@ setInterval(async () => {
 app.get("/", async (req, res) => {
   res.send("<h1>Hello</h1>");
 });
+
+
 
 
 // Route to add a manga to the database

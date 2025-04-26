@@ -71,22 +71,21 @@ function MangaCard({ manga , onDeleteSuccess }) {
       <div className="manga-card-info">
         <div className="corner-badge">{manga.status}</div>
         <div className="title-group">
-          <h2 className="main-title">{manga.title}</h2>
+          <Link to={`/mangadetails/${manga.manga_id}`} className="main-title">{manga.title}</Link>
           {manga.alternative_title && (
-            <p className="alt-title">{manga.alternative_title}</p>
-          )}
+            <p className="alt-title">{manga.alternative_title} </p>
+          )} 
         </div>
         <div className="chapter-group">
           <h2 className="sub-titles">
-            Last Chapter Read: {manga.last_chapter_read || "0"}
-            {manga.date_added_to_watchlist && ` (${formatDate(manga.date_added_to_watchlist)})`}
+            Last Chapter Read: {manga.last_chapter_read || "0"} 
           </h2>
           <p className="chapter-difference">
-            Unread: {unreadChapters}
+            Unread: {unreadChapters} 
           </p>
           <h2 className="sub-titles">
-            Latest Chapter Available: {manga.latest_chapter || "0"}
-            {manga.latest_chapter_date && ` (${formatDate(manga.latest_chapter_date)})`}
+            Latest Chapter Available: {manga.latest_chapter || "0"}  
+            { manga.latest_chapter_date && ` - (${formatDate(manga.latest_chapter_date)})`}
           </h2>
         </div>
         {manga.description && (

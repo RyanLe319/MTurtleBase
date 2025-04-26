@@ -71,8 +71,16 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Remove underline for links */
+    text-decoration: none;
+    /* Smooth transition for hover effect */
+    transition: color 0.2s ease;
 }
 
+.main-title:hover {
+    color: #b0d2f7;
+
+}
 .alt-title {
     font-size: 0.85rem;
     color: #666;

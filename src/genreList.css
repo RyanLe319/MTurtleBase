@@ -20,14 +20,18 @@
 
 .filter-title {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.75rem;
+  font-weight: 500;
 }
 
 /* ============ Grid & Item Styles ============ */
 .genre-grid {
   display: grid;
+  grid-auto-rows: minmax(100px, auto); /* auto-generate rows as needed */
+  grid-template-rows: repeat(3, minmax(100px, auto)); /* force 3 rows by default */
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
+
 }
 
 /* Responsive adjustments */

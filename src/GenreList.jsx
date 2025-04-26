@@ -64,9 +64,11 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
           body: JSON.stringify({ genre_name: trimmedGenre }),
         });
         if (!response.ok) throw new Error("Failed to add genre");
-        const newGenreData = await response.json();
-        // Update genres list with new genre
-        setGenres(prev => [...prev, newGenreData.genre_name]);
+
+        const refreshResponse = await fetch(`${BASE_URL}/api/genres`);
+        const data = await refreshResponse.json();
+        setGenres(data.map(genre => genre.genre_name));
+        
         setNewGenre(""); // Clear input
         setShowModal(false); // Close modal
       } catch (error) {
@@ -172,7 +174,7 @@ function GenreList({ onSubmitData, initialGenres = [], initialMinChapters = 0}) 
     <div className="genre-filter-box">
       {/* Header section with title and add button */}
       <div className="filter-header">
-        <h3 className="filter-title">Genres</h3>
+        <h2 className="filter-title">GENRES</h2>
         <button
           className="add-genre-btn"
           onClick={() => {

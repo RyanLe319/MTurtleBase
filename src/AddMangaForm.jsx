@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./addMangaForm.css";
 
-function AddMangaForm({ isOpen, onClose, onSuccess } ) {
-
-  // Initial form state for all input fields
+function AddMangaForm({ isOpen, onClose, onSuccess }) {
   const initialFormState = {
     title: "",
     lastChapterRead: 0,
@@ -15,18 +13,49 @@ function AddMangaForm({ isOpen, onClose, onSuccess } ) {
     image: "",
   };
 
-  
-  const [formData, setFormData] = useState(initialFormState); // Stores the form data
-  const [genreInput, setGenreInput] = useState(""); // Tracks the genre input field value
-  const [genres, setGenres] = useState([]); // Tracks added genres
-  const [errors, setErrors] = useState({}); // Use to display Title is require error
-  const [isSubmitting, setIsSubmitting] = useState(false); // Tracks the form submission status which is used to disable the form to prevent spam submission
-  const popupRef = useRef(null); // Creates a reference to the popup for handling outside clicks
+  const [formData, setFormData] = useState(initialFormState);
+  const [genreInput, setGenreInput] = useState("");
+  const [genres, setGenres] = useState([]);
+  const [allGenres, setAllGenres] = useState([]);
+  const [filteredGenres, setFilteredGenres] = useState([]);
+  const [showGenreDropdown, setShowGenreDropdown] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const popupRef = useRef(null);
+  const genreDropdownRef = useRef(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/genres`);
+        if (response.ok) {
+          const data = await response.json();
+          setAllGenres(data.map(genre => genre.genre_name));
+        }
+      } catch (error) {
+        console.error("Error fetching genres:", error);
+      }
+    };
 
-   // useEffect hook to handle closing the form if the user clicks outside or presses Escape
+    if (isOpen) {
+      fetchGenres();
+    }
+  }, [isOpen, BASE_URL]);
+
+  useEffect(() => {
+    if (genreInput.trim() === "") {
+      setFilteredGenres(allGenres);
+    } else {
+      setFilteredGenres(
+        allGenres.filter(genre =>
+          genre.toLowerCase().includes(genreInput.toLowerCase())
+        )
+      );
+    }
+  }, [genreInput, allGenres]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -34,21 +63,17 @@ function AddMangaForm({ isOpen, onClose, onSuccess } ) {
       }
     };
 
-
-
     const handleEscape = (event) => {
       if (event.key === "Escape") {
         onClose();
       }
     };
 
-    //If form is open, listen for clicks and esc 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleEscape);
     }
 
-    //Clean up fnc that gets executed first 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
@@ -56,50 +81,83 @@ function AddMangaForm({ isOpen, onClose, onSuccess } ) {
   }, [isOpen, onClose]);
 
   useEffect(() => {
+    const handleDropdownClickOutside = (event) => {
+      if (genreDropdownRef.current && !genreDropdownRef.current.contains(event.target)) {
+        setShowGenreDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleDropdownClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleDropdownClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
     setIsFormValid(formData.title.trim().length > 0);
   }, [formData.title]);
 
-  // Update the form
   const handleChange = (e) => {
-
-    //name and values are keys specified on the element that activated the event 
     const { name, value } = e.target;
     
-    //Increase the height of the description box if need be
     if (name === "description" && e.target.scrollHeight > e.target.clientHeight) {
       e.target.style.height = "auto";
       e.target.style.height = `${e.target.scrollHeight}px`;
     }
 
-    //Update the info whenever a new input is discovered
-    setFormData((prev) => ({
-      ...prev, // Spread the current state into a new object
-      [name]: value, // Update the specific field (name) with the new value
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
     }));
 
-    // This will occur when the user tries to submit a form with no title, the error will get assign
-    // the error will display, the only error is title is required
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+      setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
-  // Adding a genre to the list of genres, first checks if there is anything
-  // typed in the input field and if the genre isnt in genres if so then add it
-  // and clear the input field
-  const handleAddGenre = () => {
-    if (genreInput.trim() && !genres.includes(genreInput.trim())) {
-      setGenres([...genres, genreInput.trim()]);
+  const handleAddGenre = async (genre) => {
+    const genreToAdd = genre || genreInput.trim();
+    
+    if (!genreToAdd) return;
+
+    if (genres.includes(genreToAdd)) {
       setGenreInput("");
+      setShowGenreDropdown(false);
+      return;
     }
+
+    if (!allGenres.includes(genreToAdd)) {
+      try {
+        const response = await fetch(`${BASE_URL}/api/genres`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ genre_name: genreToAdd }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to add new genre");
+        }
+
+        const newGenre = await response.json();
+        setAllGenres([...allGenres, newGenre.genre_name]);
+      } catch (error) {
+        console.error("Error adding new genre:", error);
+        return;
+      }
+    }
+
+    setGenres([...genres, genreToAdd]);
+    setGenreInput("");
+    setShowGenreDropdown(false);
   };
 
-  // To remove an added genre
-  const handleRemoveGenre = (genreToRemove) => {
-    setGenres(genres.filter(genre => genre !== genreToRemove));
+  const handleGenreInputChange = (e) => {
+    setGenreInput(e.target.value);
+    setShowGenreDropdown(true);
   };
 
-  // Allows the use of the enter key to add and not just the add button
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -107,13 +165,14 @@ function AddMangaForm({ isOpen, onClose, onSuccess } ) {
     }
   };
 
-  // Adds the manga to the DB
-  const handleSubmit = async (e) => { 
-    e.preventDefault(); // Prevents the default form submission behavior, so the page doesn't refresh when the form is submitted
-    
-    setIsSubmitting(true); 
+  const handleRemoveGenre = (genreToRemove) => {
+    setGenres(genres.filter(genre => genre !== genreToRemove));
+  };
 
-    // Validate that the title field is not empty
+  const handleSubmit = async (e) => { 
+    e.preventDefault();
+    setIsSubmitting(true);
+
     if (!formData.title.trim()) { 
       setErrors({ title: "Title is required" }); 
       setIsSubmitting(false); 
@@ -124,131 +183,128 @@ function AddMangaForm({ isOpen, onClose, onSuccess } ) {
       const response = await fetch(`${BASE_URL}/adding-manga`, { 
         method: "POST", 
         headers: {
-          "Content-Type": "application/json", // Sets the request header to indicate we're sending JSON data
+          "Content-Type": "application/json",
         },
-        //What we are sending over
         body: JSON.stringify({
-          ...formData, // Sends all the data from the form (title, description, etc.)
-          genres: genres.length ? genres : null, // Sends genres if there are any, or null if there are none
+          ...formData,
+          genres: genres.length ? genres : null,
         }),
       });
 
-
-
-      // Checks if the response from the server is successful (status code 200-299)
-      if (!response.ok) { // If the response status is not OK (e.g., 404 or 500 error)
+      if (!response.ok) {
         const errorData = await response.json(); 
         throw new Error(errorData.error || "Failed to add manga"); 
       }
 
-      
-      const result = await response.json(); // need to do .json cause its was stringified. Just a success message object
-      console.log("Success:", result); 
+      const result = await response.json();
+      console.log("Success:", result);
 
-      setFormData(initialFormState); //Clears the form
-      setGenres([]); // Clears the genres array 
-      onSuccess(); // Calls the onSuccess callback (fnc passed as the 3rd argu) to handle additional success actions (Green successful add notification)
-      onClose(); // Closes the form 
-      // Save flag that we're reloading after add
+      setFormData(initialFormState);
+      setGenres([]);
+      onSuccess();
+      onClose();
       localStorage.setItem('reloadingAfterAdd', 'true');
       window.location.reload();
-    } catch (error) { // Catches any errors thrown during the try block
-      console.error("Submission error:", error); 
-      setErrors({ submit: error.message }); 
+    } catch (error) {
+      console.error("Submission error:", error);
+      setErrors({ submit: error.message });
     } finally {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
     }
   };
 
-
-  // If the form is not open, return null to avoid rendering
   if (!isOpen) return null;
 
   return (
-    // Popup overlay that is conditionally active based on isOpen state
     <div className={`popup-overlay ${isOpen ? 'active' : ''}`}>
-      
-      {/* Popup content container that stops click propagation to close the popup */}
       <div className="popup-content" ref={popupRef} onClick={(e) => e.stopPropagation()}>
-        
-        {/* Close button to close the form, disabled while submitting */}
         <button
           className="close-btn"
-          onClick={onClose} // Calls the onClose function to close the popup
+          onClick={onClose}
           aria-label="Close form"
-          disabled={isSubmitting} // Disables button while submitting
+          disabled={isSubmitting}
         >
           ×
         </button>
-  
 
-        <h2>Add New Manga</h2>  
+        <h2>Add New Manga</h2>
         <button 
           className="clear-button"
-          onClick={()=>{
-            setFormData(initialFormState)
-            setGenreInput("")
+          onClick={() => {
+            setFormData(initialFormState);
+            setGenreInput("");
+            setGenres([]);
           }}
-        >Clear</button>
-  
- 
-        {/* Form to add new manga, triggers handleSubmit on form submission */}
+        >
+          Clear
+        </button>
+
         <form onSubmit={handleSubmit}>
-          
-          {/* Title input field */}
           <div className="form-group">
             <label htmlFor="title">
-              Title <span className="required">*</span> {/* Required field indicator */}
+              Title <span className="required">*</span>
             </label>
             <input
               type="text"
               id="title"
               name="title"
-              value={formData.title} // Binds input value to formData
-              onChange={handleChange} // Updates formData when the input changes
-              className={errors.title ? "error" : ""} // Adds error class if there's an error
-              disabled={isSubmitting} // Disables input while submitting
+              value={formData.title}
+              onChange={handleChange}
+              className={errors.title ? "error" : ""}
+              disabled={isSubmitting}
             />
-            {/* Display error message if there's an error */}
             {errors.title && (
               <span className="error-message">{errors.title}</span>
             )}
           </div>
-  
-          {/* Genre input field */}
+
           <div className="form-group">
             <label htmlFor="genre">Genres</label>
-            <div className="genre-input-container">
+            <div className="genre-input-container" ref={genreDropdownRef}>
               <input
                 type="text"
                 id="genre"
-                value={genreInput} // Binds input value to genreInput state
-                onChange={(e) => setGenreInput(e.target.value)} // Updates genreInput state
-                onKeyDown={handleKeyDown} // Handles keydown event (e.g., Enter key)
-                placeholder="Enter genre and click Add" 
-                disabled={isSubmitting} // Disables input while submitting
+                value={genreInput}
+                onChange={handleGenreInputChange}
+                onFocus={() => setShowGenreDropdown(true)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type to search or add genre"
+                disabled={isSubmitting}
               />
               <button
                 type="button"
                 className="add-genre-btn"
-                onClick={handleAddGenre} // Adds genre when clicked
-                disabled={isSubmitting || !genreInput.trim()} // Disables button if genre input is empty or submitting
+                onClick={() => handleAddGenre()}
+                disabled={isSubmitting || !genreInput.trim()}
               >
                 Add
               </button>
+              
+              {showGenreDropdown && filteredGenres.length > 0 && (
+                <div className="genre-dropdown">
+                  {filteredGenres.map(genre => (
+                    <div
+                      key={genre}
+                      className="genre-dropdown-item"
+                      onClick={() => handleAddGenre(genre)}
+                    >
+                      {genre}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            {/* Display added genres as tags */}
+            
             {genres.length > 0 && (
               <div className="genre-tags-container">
                 {genres.map((genre) => (
                   <span key={genre} className="genre-tag">
                     {genre}
-                    {/* Button to remove a genre */}
                     <button
                       type="button"
                       className="remove-genre-btn"
-                      onClick={() => handleRemoveGenre(genre)} // Removes genre from list
-                      disabled={isSubmitting} // Disables button while submitting
+                      onClick={() => handleRemoveGenre(genre)}
+                      disabled={isSubmitting}
                     >
                       ×
                     </button>
