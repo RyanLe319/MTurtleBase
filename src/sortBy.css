@@ -30,7 +30,7 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: adds same subtle lift */
   }
   
-  .sort-by-select {
+  .sort-by-select:focus {
     outline: none;
     background: rgba(176, 210, 247, 0.1); /* Consistent hover/focus state */
     box-shadow: 0 0 0 2px rgba(143, 189, 232, 0.3);
