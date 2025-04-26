@@ -3,6 +3,8 @@
 
 A full-stack application for organizing and tracking your manga collection with additional data from the MangaDex API.
 
+Link to website: https://mturtlebase-production-24d9.up.railway.app
+
 ## Features
 
 ### Core Functionality
@@ -14,7 +16,7 @@ A full-stack application for organizing and tracking your manga collection with 
   - Filter by genres (Action, Romance, Isekai, etc.)
   - Create custom genres 
   - Search by title and chapter count  
-  - Sort by criterias
+  - Sort by criteria
 
 - 🛠 **Database Features**  
   - PostgreSQL relational database  

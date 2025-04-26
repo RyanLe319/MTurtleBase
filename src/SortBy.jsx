@@ -20,7 +20,8 @@ function SortBy({ currentSort, onSortChange }) {
           value={currentSort}
           onChange={(e) => 
             {onSortChange(e.target.value)
-              setSortBy(e.target.value)
+              setSortBy(e.target.value);
+              
             }}
         >
           <option value="a-z">A-Z</option>
