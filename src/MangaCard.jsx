@@ -4,6 +4,7 @@ import "./mangaCard0.css";
 import { Link } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Rating from './Rating.jsx'
 
 
 function MangaCard({ manga , onDeleteSuccess }) {
@@ -11,6 +12,8 @@ function MangaCard({ manga , onDeleteSuccess }) {
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
+  const [currentTier, setCurrentTier] = useState(manga.tier || "");
+
 
   // Safely calculate unread chapters
   const unreadChapters = Math.max(0, 
@@ -55,6 +58,23 @@ function MangaCard({ manga , onDeleteSuccess }) {
     }
   };
   
+  const handleTierChange = async (newTier) => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/manga/${manga.manga_id}/tier`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tier: newTier }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to update tier");
+      
+      setCurrentTier(newTier);
+    } catch (err) {
+      console.error("Tier update error:", err);
+    }
+  };
 
 
   return (
@@ -94,22 +114,30 @@ function MangaCard({ manga , onDeleteSuccess }) {
             <p>{manga.description}</p>
           </div>
         )}
-        <div className="button-group">
-          <Link to={`/mangadetails/${manga.manga_id}`} className="edit">
-            <button><EditIcon /></button>
-          </Link>
-          <button 
-              className="delete"
-              onClick={handleDelete}
-          >
-              <DeleteIcon />
-          </button>
-          {error && (
-              <div className="error-message">
-                  {error}
-              </div>
-          )}
-          <Link to={`/mangadetails/${manga.manga_id}`} className="more">More</Link>
+        <div className="card-footer">
+          <div className="rating-icon">
+            <Rating 
+              currentTier={currentTier}
+              onTierChange={handleTierChange}
+            />
+          </div>
+          <div className="button-group">
+            <Link to={`/mangadetails/${manga.manga_id}`} className="edit">
+              <button><EditIcon /></button>
+            </Link>
+            <button 
+                className="delete"
+                onClick={handleDelete}
+            >
+                <DeleteIcon />
+            </button>
+            {error && (
+                <div className="error-message">
+                    {error}
+                </div>
+            )}
+            <Link to={`/mangadetails/${manga.manga_id}`} className="more">More</Link>
+          </div>
         </div>
       </div>
     </div>

@@ -84,11 +84,22 @@ function MangaDetails() {
   const handleEditSave = async () => {
     if (!editingField) return;
     
+    // Update state immediately for instant UI feedback
+    setManga(prev => {
+      if (editingField === 'genres') {
+        return {
+          ...prev,
+          genres: tempValue.split(',').map(g => g.trim()).filter(g => g)
+                         .map(genre_name => ({ genre_name }))
+        };
+      }
+      return { ...prev, [editingField]: tempValue };
+    });
+
     setIsSaving(true);
     try {
       const payload = { [editingField]: tempValue };
       
-      // Convert genres array to comma-separated string if needed
       if (editingField === 'genres') {
         payload.genres = tempValue.split(',').map(g => g.trim()).filter(g => g);
       }
@@ -103,13 +114,17 @@ function MangaDetails() {
 
       if (!response.ok) throw new Error('Update failed');
 
+      // Update with server response to ensure complete sync
       const updatedManga = await response.json();
       setManga(prev => ({ ...prev, ...updatedManga }));
+      
       setEditingField(null);
       setTempValue('');
       setGenreInput("");
     } catch (err) {
       setError(err.message);
+      // Revert UI if update failed
+      setManga(prev => ({ ...prev }));
     } finally {
       setIsSaving(false);
     }
@@ -127,8 +142,8 @@ function MangaDetails() {
     }
   };
 
-  const renderEditableField = (label, fieldName, value, isDate = false) => {
-    if (editingField === fieldName && fieldName !== 'genres') {
+  const renderEditableField = (label, fieldName, value, isDate = false, editable = true) => {
+    if (editable && editingField === fieldName && fieldName !== 'genres') {
       if (fieldName === 'status') {
         return (
           <div className="editing-field status-editing">
@@ -190,7 +205,10 @@ function MangaDetails() {
     }
 
     return (
-      <div className="view-field" onClick={() => handleEditStart(fieldName, value)}>
+      <div 
+        className={`view-field ${!editable ? 'non-editable' : ''}`} 
+        onClick={() => editable && handleEditStart(fieldName, value)}
+      >
         <span className="field-label">{label}</span>
         <span className="field-value">
           {isDate ? formatDate(value) : (value !== null && value !== undefined ? value : 'N/A')}
@@ -211,16 +229,8 @@ function MangaDetails() {
           return;
         }
       
-        // Update the manga genres directly
         const newGenres = [...currentGenres, genreToAdd];
         setTempValue(newGenres.join(", "));
-        
-        // Update manga state immediately
-        setManga(prev => ({
-          ...prev,
-          genres: [...prev.genres, { genre_name: genreToAdd }] // Assuming genres is an array of objects
-        }));
-      
         setGenreInput("");
         setShowGenreDropdown(false);
       };
@@ -228,14 +238,7 @@ function MangaDetails() {
       const handleRemoveGenre = (genreToRemove) => {
         const newGenres = currentGenres.filter(g => g !== genreToRemove);
         setTempValue(newGenres.join(", "));
-        
-        // Update manga state immediately
-        setManga(prev => ({
-          ...prev,
-          genres: prev.genres.filter(g => g.genre_name !== genreToRemove) // Assuming genres is an array of objects
-        }));
       };
-      
 
       const handleGenreKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -353,7 +356,10 @@ function MangaDetails() {
             />
           </div>
           <div className="title-section">
-            {renderEditableField("Title", "title", manga.title)}
+            <div className="title-header">
+              {renderEditableField("Title", "title", manga.title)}
+            </div>
+            
             {manga.alternative_title && (
               <h2 className="alternative-title">
                 {renderEditableField("Alternative Title", "alternative_title", manga.alternative_title)}
@@ -388,7 +394,7 @@ function MangaDetails() {
                 {renderEditableField("Added to Watchlist", "date_added_to_watchlist", manga.date_added_to_watchlist, true)}
               </div>
               <div className="detail-item">
-                {renderEditableField("Record Created", "record_created", manga.record_created, true)}
+                {renderEditableField("Record Created", "record_created", manga.record_created, true, false)}
               </div>
               <div className="detail-item">
                 {renderEditableField("Last Updated", "record_updated_date", manga.record_updated_date, true)}

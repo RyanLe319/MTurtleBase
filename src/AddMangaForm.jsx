@@ -11,6 +11,7 @@ function AddMangaForm({ isOpen, onClose, onSuccess }) {
     latestChapterDate: "",
     description: "",
     image: "",
+    tier : "",
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -357,6 +358,27 @@ function AddMangaForm({ isOpen, onClose, onSuccess }) {
               <option value="Completed">Completed</option>
               <option value="WatchList">WatchList</option>
               <option value="Dropped">Dropped</option>
+            </select>
+          </div>
+
+
+          {/* Tier selection field */}
+          <div className="form-group">
+            <label htmlFor="tier">Tier Rating</label>
+            <select
+              id="tier"
+              name="tier"
+              value={formData.tier}
+              onChange={handleChange}
+              disabled={isSubmitting}
+            >
+              <option value="">Select tier</option>
+              <option value="S-Tier">S-Tier</option>
+              <option value="A-Tier">Elite</option>
+              <option value="B-Tier">Good Read</option>
+              <option value="C-Tier">Readable</option>
+              <option value="D-Tier">Brain Off</option>
+              <option value="F-Tier">Headache</option>
             </select>
           </div>
   
