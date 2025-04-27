@@ -42,7 +42,9 @@
 
 
 
-.rating-select.S-Tier {
+.rating-select.S-Tier,
+.rating-select.S-Tier-Plus,
+.rating-select.S-Tier-Minus {
 	background: linear-gradient(
 		90deg,
 		#ff4d4d,
@@ -93,13 +95,17 @@
 }
 
 /* For A Tier */
-.rating-select.A-Tier {
+.rating-select.A-Tier,
+.rating-select.A-Tier-Minus,
+.rating-select.A-Tier-Plus{
     background-color: #80d7ff; /* Lighter version of Sky Blue */
     box-shadow: 0 0 10px 4px rgba(77, 219, 255, 0.5); /* Soft blue glow */
   }
   
   /* For B Tier */
-  .rating-select.B-Tier {
+  .rating-select.B-Tier,
+  .rating-select.B-Tier-Minus,
+  .rating-select.B-Tier-Plus  {
     background-color: #749eff; /* Lighter version of Cobalt Blue */
     box-shadow: 0 0 10px 4px rgba(77, 136, 255, 0.5); /* Soft cobalt blue glow */
   }

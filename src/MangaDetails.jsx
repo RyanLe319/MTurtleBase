@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./mangaDetails.css";
+import Rating from './Rating.jsx';
 
 function MangaDetails() {
   const { manga_id } = useParams();
@@ -17,6 +18,7 @@ function MangaDetails() {
   const [showGenreDropdown, setShowGenreDropdown] = useState(false);
   const genreDropdownRef = useRef(null);
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const [currentTier, setCurrentTier] = useState('');
 
   useEffect(() => {
     const fetchMangaDetails = async () => {
@@ -25,6 +27,7 @@ function MangaDetails() {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setManga(data);
+        setCurrentTier(data.tier || '');
       } catch (err) {
         setError(err.message);
       } finally {
@@ -84,7 +87,6 @@ function MangaDetails() {
   const handleEditSave = async () => {
     if (!editingField) return;
     
-    // Update state immediately for instant UI feedback
     setManga(prev => {
       if (editingField === 'genres') {
         return {
@@ -114,7 +116,6 @@ function MangaDetails() {
 
       if (!response.ok) throw new Error('Update failed');
 
-      // Update with server response to ensure complete sync
       const updatedManga = await response.json();
       setManga(prev => ({ ...prev, ...updatedManga }));
       
@@ -123,7 +124,6 @@ function MangaDetails() {
       setGenreInput("");
     } catch (err) {
       setError(err.message);
-      // Revert UI if update failed
       setManga(prev => ({ ...prev }));
     } finally {
       setIsSaving(false);
@@ -139,6 +139,24 @@ function MangaDetails() {
       handleEditSave();
     } else if (e.key === 'Escape') {
       handleEditCancel();
+    }
+  };
+
+  const handleTierChange = async (newTier) => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/manga/${manga.manga_id}/tier`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tier: newTier }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to update tier");
+      
+      setCurrentTier(newTier);
+    } catch (err) {
+      console.error("Tier update error:", err);
     }
   };
 
@@ -365,11 +383,16 @@ function MangaDetails() {
                 {renderEditableField("Alternative Title", "alternative_title", manga.alternative_title)}
               </h2>
             )}
+            
             <div 
               className={`status-badge ${editingField === 'status' ? 'editing' : ''}`} 
               data-status={editingField === 'status' ? '' : manga.status}
             >
               {renderEditableField("Status", "status", manga.status)}
+            </div>
+            
+            <div className="tier-section">
+              <Rating currentTier={currentTier} onTierChange={handleTierChange} />
             </div>
           </div>
         </div>

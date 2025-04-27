@@ -109,6 +109,10 @@
   font-weight: bold;
 }
 
+.tier-section{
+  width: 179px
+}
+
 /* Content sections */
 .manga-content {
   display: flex;

@@ -3,13 +3,20 @@ import './rating.css'
 
 function Rating({ currentTier, onTierChange }) {
     const tierOptions = {
-        'S-Tier': 'S-Tier',
+        'S-Tier-Plus': 'S Tier+',
+        'S-Tier': 'S Tier',
+        'S-Tier-Minus': 'S Tier-',
+        'A-Tier-Plus': 'Elite+',
         'A-Tier': 'Elite',
+        'A-Tier-Minus': 'Elite-',
+        'B-Tier-Plus': 'Good Read+',
         'B-Tier': 'Good Read',
+        'B-Tier-Minus': 'Good Read-',
         'C-Tier': 'Readable',
         'D-Tier': 'Brain Off',
         'F-Tier': 'Headache'
-    }
+    };
+    
 
     return (
         <select
