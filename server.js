@@ -61,6 +61,7 @@ app.post("/adding-manga", async (req, res) => {
 			description,
 			image,
 			genres,
+			tier,
 		} = req.body;
 
 		console.log(req.body);
@@ -85,8 +86,9 @@ app.post("/adding-manga", async (req, res) => {
         status,
         latest_chapter,
         latest_chapter_date,
+		tier,
         record_created
-      ) VALUES ($1, $2, $3, $4, $5, $6, NOW()) 
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
       RETURNING manga_id`,
 			[
 				title,
@@ -95,6 +97,7 @@ app.post("/adding-manga", async (req, res) => {
 				status || null,
 				latestChapter || 0,
 				latestChapterDate || null,
+				tier || null
 			]
 		);
 

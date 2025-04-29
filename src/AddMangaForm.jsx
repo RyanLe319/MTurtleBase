@@ -373,9 +373,15 @@ function AddMangaForm({ isOpen, onClose, onSuccess }) {
               disabled={isSubmitting}
             >
               <option value="">Select tier</option>
-              <option value="S-Tier">S-Tier</option>
+              <option value="S-Tier-Plus">S Tier+</option>
+              <option value="S-Tier">S Tier</option>
+              <option value="S-Tier-Minus">S Tier-</option>
+              <option value="A-Tier-Plus">Elite+</option>
               <option value="A-Tier">Elite</option>
+              <option value="A-Tier-Minus">Elite-</option>
+              <option value="B-Tier-Plus">Good Read+</option>
               <option value="B-Tier">Good Read</option>
+              <option value="B-Tier-Minus">Good Read-</option>
               <option value="C-Tier">Readable</option>
               <option value="D-Tier">Brain Off</option>
               <option value="F-Tier">Headache</option>
