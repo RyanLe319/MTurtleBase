@@ -2,6 +2,7 @@
 .manga-card {
     display: flex;
     height: 285px; /* Fixed height matching grid row height */
+    width: 712.5px;
     position: relative;
     background: white; /* Ensures consistent background */
     border-radius: 2px;
@@ -49,12 +50,13 @@
 
 /* Info section - add scrolling and height constraints */
 .manga-card-info {
-    width: 70%;
+    flex: 1 1 70%;
+    max-width: 73%;
     padding: 16px;
-    height: 100%; /* Take full card height */
+    height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Contain content */
+    overflow: hidden;
 }
 
 /* Title group - prevent expansion */
@@ -71,11 +73,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Remove underline for links */
     text-decoration: none;
-    /* Smooth transition for hover effect */
     transition: color 0.2s ease;
-}
+    width: 100%;
+    display: block; /* Important */
+  }
+  
+
 
 .main-title:hover {
     color: #b0d2f7;
