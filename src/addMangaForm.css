@@ -346,3 +346,19 @@
 .genre-dropdown-item:hover {
   background-color: #f5f5f5;
 }
+
+/* Tier select styling */
+#tier {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  transition: border-color 0.3s ease; /* Smooth transition */
+}
+
+/* Hover state */
+#tier:hover {
+  border-color: #b0d2f7;
+}
+

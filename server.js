@@ -64,6 +64,7 @@ app.post("/adding-manga", async (req, res) => {
 			description,
 			image,
 			genres,
+			tier,
 		} = req.body;
 
 		console.log(req.body);
@@ -88,8 +89,9 @@ app.post("/adding-manga", async (req, res) => {
         status,
         latest_chapter,
         latest_chapter_date,
+		tier,
         record_created
-      ) VALUES ($1, $2, $3, $4, $5, $6, NOW()) 
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
       RETURNING manga_id`,
 			[
 				title,
@@ -98,6 +100,7 @@ app.post("/adding-manga", async (req, res) => {
 				status || null,
 				latestChapter || 0,
 				latestChapterDate || null,
+				tier || null
 			]
 		);
 
@@ -407,6 +410,7 @@ app.get("/api/manga", async (req, res) => {
         m.cover_art_url,
         m.description,
         m.status,
+		m.tier,
         COALESCE(m.latest_chapter, 0) as latest_chapter,
         m.latest_chapter_date,
         w.last_chapter_read,
@@ -493,6 +497,7 @@ app.get("/api/watchlist", async (req, res) => {
         m.cover_art_url,
         m.description,
         m.status,
+		m.tier,
         COALESCE(m.latest_chapter, 0) as latest_chapter,
         m.latest_chapter_date,
         w.last_chapter_read,
@@ -752,6 +757,31 @@ app.delete("/api/genres/:name", async (req, res) => {
 		});
 	}
 });
+
+// New endpoint for updating tier
+app.patch("/api/manga/:id/tier", async (req, res) => {
+	try {
+	  const { id } = req.params;
+	  const { tier } = req.body;
+  
+	  await db.query(
+		`UPDATE manga SET tier = $1 WHERE manga_id = $2`,
+		[tier, id]
+	  );
+  
+	  res.json({ 
+		success: true,
+		message: "Tier updated successfully"
+	  });
+	  
+	} catch (err) {
+	  console.error("Error updating tier:", err);
+	  res.status(500).json({
+		success: false,
+		error: "Failed to update tier"
+	  });
+	}
+  });
 
 // Serve static files from the dist directory (Vite output)
 app.use(express.static(path.join(__dirname, 'dist')));

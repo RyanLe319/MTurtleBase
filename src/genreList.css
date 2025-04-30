@@ -27,8 +27,8 @@
 /* ============ Grid & Item Styles ============ */
 .genre-grid {
   display: grid;
-  grid-auto-rows: minmax(100px, auto); /* auto-generate rows as needed */
-  grid-template-rows: repeat(3, minmax(100px, auto)); /* force 3 rows by default */
+  grid-auto-rows: minmax(10px, auto); /* auto-generate rows as needed */
+  grid-template-rows: repeat(3, minmax(10px, auto)); /* force 3 rows by default */
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
 

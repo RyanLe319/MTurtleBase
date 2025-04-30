@@ -1,0 +1,136 @@
+.rating {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	margin-left: -9px;
+	flex-grow: 1;
+}
+
+.rating-select {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	border: none;
+	outline: none;
+	background-image: none;
+	flex-grow: 1;
+	min-width: 0;
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+	padding: 6px 12px;
+	border-radius: 5px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+	color: #000; /* Always black text */
+	height: 30px; /* Explicit height control */
+	line-height: 1; /* Ensures text is properly centered vertically */
+	margin-top: 3px;
+}
+
+/* Dropdown options styling */
+.rating-select option {
+	color: #000; /* Black text */
+	background: #fff; /* White background */
+}
+
+
+
+.rating-select.S-Tier,
+.rating-select.S-Tier-Plus,
+.rating-select.S-Tier-Minus {
+	background: linear-gradient(
+		90deg,
+		#ff4d4d,
+		/* Vibrant red */ #ff9a4d,
+		/* Warm orange */ #ffdf4d,
+		/* Sunny yellow */ #a3ff4d,
+		/* Lime green */ #4dffb5,
+		/* Aqua */ #4ddbff,
+		/* Sky blue */ #4d88ff,
+		/* Cobalt */ #7d4dff,
+		/* Royal purple */ #c44dff,
+		/* Electric purple */ #ff4dd3,
+		/* Hot pink */ #ff4d7d,
+		/* Rosy pink */ #ff4d4d /* Matching red */
+	);
+	background-size: 1200% 100%;
+	animation: one-way-rainbow 12s linear infinite;
+	color: #222; /* Slightly lighter than pure black */
+	font-weight: bold;
+	position: relative;
+	text-shadow: 0 0 2px rgba(255, 255, 255, 0.3); /* Better text visibility */
+    box-shadow: 0 0 10px rgba(192, 192, 192, 0.8); /* Silver glow */
+
+    
+}
+
+@keyframes one-way-rainbow {
+	0% {
+		background-position: 0% 0;
+	}
+	100% {
+		background-position: 100% 0;
+	}
+}
+
+.rating-select.S-Tier::before {
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	right: 2px;
+	bottom: 2px;
+	background: rgba(255, 255, 255, 0.2); /* Brighter overlay */
+	border-radius: 4px;
+	z-index: -1;
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4); /* Inner silver shimmer */
+
+}
+
+/* For A Tier */
+.rating-select.A-Tier,
+.rating-select.A-Tier-Minus,
+.rating-select.A-Tier-Plus{
+    background-color: #80d7ff; /* Lighter version of Sky Blue */
+    box-shadow: 0 0 10px 4px rgba(77, 219, 255, 0.5); /* Soft blue glow */
+  }
+  
+  /* For B Tier */
+  .rating-select.B-Tier,
+  .rating-select.B-Tier-Minus,
+  .rating-select.B-Tier-Plus  {
+    background-color: #749eff; /* Lighter version of Cobalt Blue */
+    box-shadow: 0 0 10px 4px rgba(77, 136, 255, 0.5); /* Soft cobalt blue glow */
+  }
+  
+  /* For C Tier */
+  .rating-select.C-Tier {
+    background-color: #9b6dff; /* Lighter version of Royal Purple */
+    box-shadow: 0 0 10px 4px rgba(125, 77, 255, 0.5); /* Soft royal purple glow */
+  }
+  
+  /* For D Tier */
+  .rating-select.D-Tier {
+    background-color: #ffbb7d; /* Lighter version of Warm Orange */
+    box-shadow: 0 0 10px 4px rgba(255, 154, 77, 0.5); /* Soft warm orange glow */
+  }
+  
+  /* For F Tier */
+  .rating-select.F-Tier {
+    background-color: #ff80a6; /* Lighter version of Rosy Pink */
+    box-shadow: 0 0 10px 4px rgba(255, 77, 125, 0.5); /* Soft rosy pink glow */
+  }
+  
+
+/* Default state */
+.rating-select:invalid {
+	background-color: #f0f0f0;
+	color: #777;
+}

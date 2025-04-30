@@ -2,6 +2,7 @@
 .manga-card {
     display: flex;
     height: 285px; /* Fixed height matching grid row height */
+    width: 712.5px;
     position: relative;
     background: white; /* Ensures consistent background */
     border-radius: 2px;
@@ -49,12 +50,13 @@
 
 /* Info section - add scrolling and height constraints */
 .manga-card-info {
-    width: 70%;
+    flex: 1 1 70%;
+    max-width: 73%;
     padding: 16px;
-    height: 100%; /* Take full card height */
+    height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Contain content */
+    overflow: hidden;
 }
 
 /* Title group - prevent expansion */
@@ -71,11 +73,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Remove underline for links */
     text-decoration: none;
-    /* Smooth transition for hover effect */
     transition: color 0.2s ease;
-}
+    width: 100%;
+    display: block; /* Important */
+  }
+  
+
 
 .main-title:hover {
     color: #b0d2f7;
@@ -123,6 +127,7 @@
     margin-top: 8px;
     flex: 1; /* Take remaining space */
     min-height: 0; /* Crucial for proper flex behavior */
+    margin-bottom: 0px; /* Optional: if padding isn't enough */
     overflow: hidden;
 }
 
@@ -145,15 +150,41 @@
     max-height: 4.2em; /* Fallback for non-webkit */
 }
 
-/* Button group - position at bottom */
+.card-footer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
+    /* Removed justify-content: space-between */
+}
+
+.rating-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-grow: 1; /* Take all available space */
+    min-width: 0; /* Allows text truncation */
+    padding-right: 16px; /* Space before buttons */
+    height: 25px;
+    
+}
+
+.rating-select {
+    max-width: 80%; /* Prevent overflow */
+    flex-grow: 1; /* Stretch to fill */
+    height: 100%; /* Take full height of container */
+
+}
+
 .button-group {
     display: flex;
-    justify-content: flex-end;
     gap: 16px;
     align-items: center;
-    margin-top: auto; /* Push to bottom */
-    padding-top: 8px;
+    flex-shrink: 0; /* Don't let buttons shrink */
+    margin-left: auto; /* Push to far right */
 }
+
 
 /* Keep all your existing button styles */
 .edit button {
