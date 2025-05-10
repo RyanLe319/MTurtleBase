@@ -19,6 +19,8 @@ function MangaDetails() {
   const genreDropdownRef = useRef(null);
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [currentTier, setCurrentTier] = useState('');
+  const [coverArtTempUrl, setCoverArtTempUrl] = useState("");
+
 
   useEffect(() => {
     const fetchMangaDetails = async () => {
@@ -143,22 +145,32 @@ function MangaDetails() {
   };
 
   const handleTierChange = async (newTier) => {
+    const previousTier = currentTier;
+    setCurrentTier(newTier);  // Optimistic update to the UI
+  
     try {
-      const response = await fetch(`${BASE_URL}/api/manga/${manga.manga_id}/tier`, {
-        method: "PATCH",
+      const response = await fetch(`${BASE_URL}/api/manga/${manga_id}`, {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ tier: newTier }),
       });
   
-      if (!response.ok) throw new Error("Failed to update tier");
-      
-      setCurrentTier(newTier);
+      if (!response.ok) {
+        throw new Error('Failed to update tier');
+      }
+  
+      const updatedManga = await response.json();
+      setManga(prev => ({ ...prev, tier: updatedManga.tier }));
+  
     } catch (err) {
-      console.error("Tier update error:", err);
+      console.error("Error updating tier:", err);
+      setCurrentTier(previousTier);  // Revert if the update fails
+      alert("Failed to update tier. Please try again.");
     }
   };
+  
 
   const renderEditableField = (label, fieldName, value, isDate = false, editable = true) => {
     if (editable && editingField === fieldName && fieldName !== 'genres') {
@@ -234,6 +246,9 @@ function MangaDetails() {
       </div>
     );
   };
+
+  
+
 
   const renderGenres = () => {
     if (editingField === 'genres') {
@@ -331,6 +346,7 @@ function MangaDetails() {
       );
     }
 
+
     return (
       <div className="genres-section" onClick={() => {
         const genresString = manga.genres?.map(g => g.genre_name).join(", ") || "";
@@ -356,6 +372,53 @@ function MangaDetails() {
   if (error) return <div className="error-container">Error: {error}</div>;
   if (!manga) return <div className="not-found-container">Manga not found</div>;
 
+
+  const handleCoverArtSave = async () => {
+    if (editingField !== "cover_art_url") return;
+    
+    setIsSaving(true);
+    try {
+      const img = new Image();
+      img.src = coverArtTempUrl;
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error('Invalid image URL'));
+      });
+  
+      const response = await fetch(`${BASE_URL}/api/manga/${manga_id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cover_art_url: coverArtTempUrl }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update cover art');
+      }
+  
+      const responseData = await response.json();
+      
+      setManga(prev => ({
+        ...prev,
+        cover_art_url: responseData.manga.cover_art_url
+      }));
+      
+      setEditingField(null);
+      setCoverArtTempUrl("");
+    } catch (err) {
+      setError(err.message);
+      setManga(prev => ({
+        ...prev,
+        cover_art_url: "https://media1.tenor.com/m/UNpuEsjDH_MAAAAC/one-piece-one-piece-zoro.gif"
+      }));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="content-container">
@@ -364,15 +427,53 @@ function MangaDetails() {
         </button>
 
         <div className="manga-header">
-          <div className="cover-art">
+        
+        <div className="cover-art">
+          {editingField === "cover_art_url" ? (
+            <div className="image-edit-container">
+              <input
+                type="text"
+                value={coverArtTempUrl}
+                onChange={(e) => setCoverArtTempUrl(e.target.value)}
+                placeholder="Enter new image URL"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleCoverArtSave();
+                  } else if (e.key === 'Escape') {
+                    handleEditCancel();
+                  }
+                }}
+              />
+              <div className="edit-buttons">
+                <button
+                  onClick={handleCoverArtSave}
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  onClick={handleEditCancel}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
             <img
               src={manga.cover_art_url || "https://media1.tenor.com/m/UNpuEsjDH_MAAAAC/one-piece-one-piece-zoro.gif"}
               alt={manga.title}
+              onClick={() => {
+                handleEditStart("cover_art_url", manga.cover_art_url || "");
+                setCoverArtTempUrl(manga.cover_art_url || "");
+              }}
               onError={(e) => {
                 e.target.src = "https://media1.tenor.com/m/UNpuEsjDH_MAAAAC/one-piece-one-piece-zoro.gif";
               }}
             />
-          </div>
+          )}
+        </div>
+
           <div className="title-section">
             <div className="title-header">
               {renderEditableField("Title", "title", manga.title)}

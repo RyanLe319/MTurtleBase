@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import TurtleLogo from "../public/assets/TurtleLogo2.png";
+import TurtleLogo from "/assets/TurtleLogo2.png";
 import "./websiteLogo.css";
 
 function WebsiteLogo() {
