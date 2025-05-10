@@ -27,17 +27,20 @@ function HomePage() {
 
   useEffect(() => {
     const fetchTotalCount = async () => {
+      const url = `${BASE_URL}/api/manga?page=1&limit=1`;
+      console.log("📡 Fetching total count from:", url); // <-- DEBUG LINE
       try {
-        const response = await fetch(`${BASE_URL}/api/manga?page=1&limit=1`);
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch total count");
         const data = await response.json();
         setTotalMangaCount(data.pagination.total);
       } catch (err) {
-        console.error("Error fetching total count:", err);
+        console.error("❌ Error fetching total count:", err);
       }
     };
     fetchTotalCount();
   }, []);
+  
 
   const handleMoreClick = () => {
     const initialPage = Math.ceil(totalMangaCount / 10);
