@@ -247,6 +247,8 @@ function MangaDetails() {
     );
   };
 
+  
+
 
   const renderGenres = () => {
     if (editingField === 'genres') {
