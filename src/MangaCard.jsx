@@ -10,6 +10,8 @@ import Rating from './Rating.jsx'
 function MangaCard({ manga , onDeleteSuccess }) {
 
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  console.log("BASE URL IN Card: ", BASE_URL);
+
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
   const [currentTier, setCurrentTier] = useState(manga.tier || "");
