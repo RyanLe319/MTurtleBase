@@ -32,11 +32,24 @@ const db = new pg.Client({
   
 // Connect to DB
 db.connect()
-  .then(() => console.log('Connected to Postgre database'))
+  .then(() => console.log('Connected to supabase database'))
   .catch(err => {
     console.error('Database connection failed:', err);
     process.exit(1);
-  });
+});
+
+
+app.use((req, res, next) => {
+console.log('📨 [DEBUG] Incoming Request:', {
+	method: req.method,
+	path: req.path,
+	query: req.query,
+	headers: req.headers,
+	ip: req.ip,
+	timestamp: new Date().toISOString()
+});
+next();
+});
 
 
 // API ROUTES (must come before static files)
@@ -48,7 +61,139 @@ app.get("/", async (req, res) => {
 });
 
 
+// Updated GET endpoint with search functionality
+app.get("/api/manga", async (req, res) => {
 
+
+	  console.log("🔍 [DEBUG] /api/manga Query Parameters:", req.query);
+
+	try {
+		
+		const {
+			page = 1,
+			limit = 10,
+			genres = "",
+			min_chapters = 0,
+			sort = "newest",
+			search = "", // New search parameter
+		} = req.query;
+
+		const offset = (page - 1) * limit;
+		const genreList = genres ? genres.split(",") : [];
+		const minChaptersNum = Number(min_chapters) || 0;
+
+		// Sorting options
+		const sortOptions = {
+			"a-z": { field: "m.title", order: "ASC" },
+			newest: { field: "m.record_created", order: "DESC" },
+			updated: { field: "m.latest_chapter_date", order: "DESC" },
+			chapters: { field: "COALESCE(m.latest_chapter, 0)", order: "DESC" },
+			unread: {
+				field:
+					"(COALESCE(m.latest_chapter, 0) - COALESCE(w.last_chapter_read, 0))",
+				order: "DESC",
+			},
+		};
+
+		const currentSort = sortOptions[sort] || sortOptions.newest;
+
+		let query = `
+      SELECT 
+        m.manga_id,
+        m.title,
+        m.alternative_title,
+        m.cover_art_url,
+        m.description,
+        m.status,
+		m.tier,
+        COALESCE(m.latest_chapter, 0) as latest_chapter,
+        m.latest_chapter_date,
+        w.last_chapter_read,
+        w.date_added_to_watchlist,
+        COUNT(*) OVER() as total_count
+      FROM manga m
+      LEFT JOIN watchlist w ON m.manga_id = w.manga_id
+    `;
+
+		const whereClauses = [];
+		const queryParams = [];
+
+		// Add search condition (searches title, alternative title, and description)
+		if (search) {
+			whereClauses.push(`
+        (m.title ILIKE $${queryParams.length + 1} OR 
+         m.alternative_title ILIKE $${queryParams.length + 1} OR
+         m.description ILIKE $${queryParams.length + 1})
+      `);
+			queryParams.push(`%${search}%`);
+		}
+
+		// Add genre filter
+		if (genreList.length > 0) {
+			whereClauses.push(`
+        m.manga_id IN (
+          SELECT mg.manga_id 
+          FROM mangagenres mg
+          JOIN genres g ON mg.genre_id = g.genre_id
+          WHERE g.genre_name = ANY($${queryParams.length + 1})
+        )
+      `);
+			queryParams.push(genreList);
+		}
+
+		// Add minimum chapters filter
+		if (minChaptersNum > 0) {
+			whereClauses.push(`m.latest_chapter >= $${queryParams.length + 1}`);
+			queryParams.push(minChaptersNum);
+		}
+
+		// Combine WHERE clauses if they exist
+		if (whereClauses.length > 0) {
+			query += " WHERE " + whereClauses.join(" AND ");
+		}
+
+		// Add sorting and pagination
+		query += ` ORDER BY ${currentSort.field} ${currentSort.order}`;
+		queryParams.push(limit, offset);
+		query += ` LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}`;
+
+		const { rows } = await db.query(query, queryParams);
+
+		res.json({
+			success: true,
+			data: rows,
+			pagination: {
+				page: Number(page),
+				limit: Number(limit),
+				total: rows[0]?.total_count || 0,
+			},
+		});
+	}  catch (err) {
+		console.error("💥 [DEBUG] Database Error:", {
+		  error: err.message,
+		  query: query,
+		  parameters: queryParams,
+		  stack: err.stack
+		});
+		res.status(500).json({ 
+		  success: false,
+		  error: "Database operation failed"
+		});
+	  }
+});
+
+app.use((err, req, res, next) => {
+	console.error('🚨 [DEBUG] Unhandled Error:', {
+	  error: err.stack,
+	  request: {
+		method: req.method,
+		url: req.originalUrl,
+		body: req.body
+	  },
+	  timestamp: new Date().toISOString()
+	});
+	res.status(500).json({ error: 'Internal Server Error' });
+  });
 
 // Route to add a manga to the database
 app.post("/adding-manga", async (req, res) => {
@@ -369,119 +514,6 @@ app.patch("/api/manga/:manga_id", async (req, res) => {
 	}
 });
 
-// Updated GET endpoint with search functionality
-app.get("/api/manga", async (req, res) => {
-
-	console.log("Incoming request to /api/manga with query:", req.query); // ← Add this
-	try {
-		const {
-			page = 1,
-			limit = 10,
-			genres = "",
-			min_chapters = 0,
-			sort = "newest",
-			search = "", // New search parameter
-		} = req.query;
-
-		const offset = (page - 1) * limit;
-		const genreList = genres ? genres.split(",") : [];
-		const minChaptersNum = Number(min_chapters) || 0;
-
-		// Sorting options
-		const sortOptions = {
-			"a-z": { field: "m.title", order: "ASC" },
-			newest: { field: "m.record_created", order: "DESC" },
-			updated: { field: "m.latest_chapter_date", order: "DESC" },
-			chapters: { field: "COALESCE(m.latest_chapter, 0)", order: "DESC" },
-			unread: {
-				field:
-					"(COALESCE(m.latest_chapter, 0) - COALESCE(w.last_chapter_read, 0))",
-				order: "DESC",
-			},
-		};
-
-		const currentSort = sortOptions[sort] || sortOptions.newest;
-
-		let query = `
-      SELECT 
-        m.manga_id,
-        m.title,
-        m.alternative_title,
-        m.cover_art_url,
-        m.description,
-        m.status,
-		m.tier,
-        COALESCE(m.latest_chapter, 0) as latest_chapter,
-        m.latest_chapter_date,
-        w.last_chapter_read,
-        w.date_added_to_watchlist,
-        COUNT(*) OVER() as total_count
-      FROM manga m
-      LEFT JOIN watchlist w ON m.manga_id = w.manga_id
-    `;
-
-		const whereClauses = [];
-		const queryParams = [];
-
-		// Add search condition (searches title, alternative title, and description)
-		if (search) {
-			whereClauses.push(`
-        (m.title ILIKE $${queryParams.length + 1} OR 
-         m.alternative_title ILIKE $${queryParams.length + 1} OR
-         m.description ILIKE $${queryParams.length + 1})
-      `);
-			queryParams.push(`%${search}%`);
-		}
-
-		// Add genre filter
-		if (genreList.length > 0) {
-			whereClauses.push(`
-        m.manga_id IN (
-          SELECT mg.manga_id 
-          FROM mangagenres mg
-          JOIN genres g ON mg.genre_id = g.genre_id
-          WHERE g.genre_name = ANY($${queryParams.length + 1})
-        )
-      `);
-			queryParams.push(genreList);
-		}
-
-		// Add minimum chapters filter
-		if (minChaptersNum > 0) {
-			whereClauses.push(`m.latest_chapter >= $${queryParams.length + 1}`);
-			queryParams.push(minChaptersNum);
-		}
-
-		// Combine WHERE clauses if they exist
-		if (whereClauses.length > 0) {
-			query += " WHERE " + whereClauses.join(" AND ");
-		}
-
-		// Add sorting and pagination
-		query += ` ORDER BY ${currentSort.field} ${currentSort.order}`;
-		queryParams.push(limit, offset);
-		query += ` LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}`;
-
-		const { rows } = await db.query(query, queryParams);
-
-		res.json({
-			success: true,
-			data: rows,
-			pagination: {
-				page: Number(page),
-				limit: Number(limit),
-				total: rows[0]?.total_count || 0,
-			},
-		});
-	} catch (err) {
-		console.error("Database error:", err);
-		res.status(500).json({
-			success: false,
-			error: "Failed to fetch manga",
-			details: process.env.NODE_ENV === "development" ? err.message : undefined,
-		});
-	}
-});
 
 // GET endpoint to retrieve user's watchlist
 app.get("/api/watchlist", async (req, res) => {

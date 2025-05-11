@@ -28,14 +28,44 @@ function HomePage() {
   useEffect(() => {
     const fetchTotalCount = async () => {
       const url = `${BASE_URL}/api/manga?page=1&limit=1`;
-      console.log("📡 Fetching total count from:", url); // <-- DEBUG LINE
+      console.log("🌐 [DEBUG] Full Request URL:", url);
+      
       try {
+        console.time('API Request Timer');
         const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch total count");
+        console.timeEnd('API Request Timer');
+
+        console.log("📦 [DEBUG] Response Headers:", [...response.headers.entries()]);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("❌ [DEBUG] Non-OK Response:", {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText.slice(0, 200) // First 200 chars
+          });
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType?.includes('application/json')) {
+          const text = await response.text();
+          console.error("⚠️ [DEBUG] Non-JSON Response:", text.slice(0, 200));
+          throw new Error(`Expected JSON, got ${contentType}`);
+        }
+
         const data = await response.json();
+        console.log("✅ [DEBUG] Successful Response:", {
+          pagination: data.pagination,
+          dataLength: data.data?.length
+        });
         setTotalMangaCount(data.pagination.total);
       } catch (err) {
-        console.error("❌ Error fetching total count:", err);
+        console.error("🔥 [DEBUG] Fetch Error:", {
+          error: err.message,
+          stack: err.stack,
+          timestamp: new Date().toISOString()
+        });
       }
     };
     fetchTotalCount();
