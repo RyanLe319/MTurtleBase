@@ -7,7 +7,7 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
   const [mangaList, setMangaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const limit = 10;
+  const limit = 10; // Controls how much manga per page
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
@@ -25,7 +25,7 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
         });
 
         if (filterData.selectedGenres?.length > 0) {
-          params.append('genres', filterData.selectedGenres.join(','));
+          params.appeand('genres', filterData.selectedGenres.join(','));
         }
 
         const endpoint = isWatchlist

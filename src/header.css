@@ -66,3 +66,7 @@
   color: #b0d2f7;
 }
 
+.search-container {
+  position: relative; /* Needed for absolute positioning of dropdown */
+  width: 100%;
+}
