@@ -15,7 +15,7 @@ function AdvanceSearchPage() {
   const [filterData, setFilterData] = useState({
     selectedGenres: [],
     minChapters: 0,
-    searchQuery: searchParams.get("search") || "",
+    searchQuery: location.state?.initialSearchQuery || searchParams.get("search") || "",
     itemsPerPage: 10 // Add itemsPerPage to filterData
   });
   const [currentSort, setCurrentSort] = useState('newest');

@@ -5,12 +5,12 @@ import './MangaCardResult.css';
 function MangaCardResult({ manga, onClick }) {
   const navigate = useNavigate();
 
-    // Ensure you're not accidentally calling navigate twice
-    const handleClick = (e) => {
-        e.preventDefault();
-        e.stopPropagation(); // Add this to prevent bubbling
-        navigate(`/manga/${manga.manga_id}`); // SINGLE navigate call
-    };
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClick();
+    // Navigation is now handled by the parent component
+  };
 
   return (
     <div 

@@ -14,11 +14,10 @@ function Header() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef(null);
-    const inputRef = useRef(null); // New ref for the input
+    const inputRef = useRef(null);
     const navigate = useNavigate();
     const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
-    // Fetch search results when input changes
     useEffect(() => {
         const fetchResults = async () => {
             if (searchInput.trim().length > 1) {
@@ -47,7 +46,6 @@ function Header() {
         return () => clearTimeout(debounceTimer);
     }, [searchInput, BASE_URL]);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -66,15 +64,37 @@ function Header() {
             e.preventDefault();
             setShowDropdown(false);
             if (searchInput.trim()) {
-                navigate(`/advancesearch?search=${encodeURIComponent(searchInput.trim())}`);
+                navigate('/advancesearch', {
+                  state: {
+                    initialSearchQuery: searchInput.trim(),
+                    initialPage: 1
+                  }
+                });
+                setSearchInput("");
             }
         }
     };
 
     const handleResultClick = (manga) => {
-        setSearchInput(manga.title);
+        setSearchInput("");
         setShowDropdown(false);
-        navigate(`/manga/${manga.manga_id}`);
+        setTimeout(() => {
+            navigate(`/manga/${manga.manga_id}`);
+            inputRef.current?.blur();
+        }, 150);
+    };
+
+    const handleViewAllResults = () => {
+        setSearchInput("");
+        setShowDropdown(false);
+        setTimeout(() => {
+            navigate('/advancesearch', {
+                state: {
+                    initialSearchQuery: searchInput.trim(),
+                    initialPage: 1
+                }
+            });
+        }, 150);
     };
 
     return (
@@ -87,7 +107,6 @@ function Header() {
             
             <div className="right-group">
                 <div className="search-container" ref={dropdownRef}>
-                    {/* Removed the form element and added direct input handling */}
                     <TextField
                         id="search-field"
                         placeholder="Search manga..."
@@ -105,7 +124,6 @@ function Header() {
                                     <SearchIcon />
                                 </InputAdornment>
                             ),
-                            // These props disable all browser autocomplete
                             inputProps: {
                                 autoComplete: 'off',
                                 autoCorrect: 'off',
@@ -125,6 +143,8 @@ function Header() {
                             results={searchResults}
                             isLoading={isLoading}
                             onResultClick={handleResultClick}
+                            searchQuery={searchInput}
+                            onViewAllResults={handleViewAllResults}
                         />
                     )}
                 </div>

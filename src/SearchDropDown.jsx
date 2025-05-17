@@ -1,8 +1,21 @@
 import React from 'react';
 import MangaCardResult from './MangaCardResult';
 import './SearchDropDown.css';
+import { useNavigate } from 'react-router-dom';
 
-function SearchDropDown({ results, isLoading, onResultClick }) {
+function SearchDropDown({ results, isLoading, onResultClick, searchQuery, onViewAllResults }) {
+  const maxPreviewResults = 5;
+  const navigate = useNavigate();
+
+  const handleViewAllResults = () => {
+    onViewAllResults();
+    setTimeout(() => {
+      navigate(`/search-results?query=${encodeURIComponent(searchQuery)}&page=1`, {
+        replace: true
+      });
+    }, 150);
+  };
+
   return (
     <div className="search-dropdown">
       {isLoading ? (
@@ -10,17 +23,23 @@ function SearchDropDown({ results, isLoading, onResultClick }) {
       ) : results.length > 0 ? (
         <>
           <div className="dropdown-results">
-            {results.map((manga) => (
+            {results.slice(0, maxPreviewResults).map((manga) => (
               <MangaCardResult 
                 key={manga.manga_id} 
                 manga={manga}
-                onClick={onResultClick} // Pass the click handler
+                onClick={() => onResultClick(manga)}
               />
             ))}
           </div>
           <div className="dropdown-footer">
-            <span>Total Results: {results.length}</span>
-            <span className="more-link">More</span>
+            <span className="results-count">
+            </span>
+            <button 
+              className="more-button"
+              onClick={handleViewAllResults}
+            >
+              View All Results
+            </button>
           </div>
         </>
       ) : (

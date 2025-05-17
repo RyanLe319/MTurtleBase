@@ -7,6 +7,7 @@ import AdvanceSearchPage from "./AdvanceSearchPage";
 import MangaDetails from "./MangaDetails";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
+import ResultPage from "./ResultPage";
 import "./App.css";
 
 function App() {
@@ -22,9 +23,9 @@ function App() {
             <Route path="/watchlist" element={<WatchListPage />} />
             <Route path="/advancesearch" element={<AdvanceSearchPage />} />
             <Route path="/mangadetails/:manga_id" element={<MangaDetails />} />
-            // In your routes configuration:
             <Route path="/manga/:manga_id" element={<MangaDetails />} />
-            
+            <Route path="/search-results" element={<ResultPage />} />
+
             {/* Fallback routes */}
             <Route path="/addmanga" element={<HomePage />} />
             <Route path="*" element={<HomePage />} />

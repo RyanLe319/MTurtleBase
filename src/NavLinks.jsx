@@ -29,7 +29,7 @@ function NavLinks() {
   return (
     <>
       <div className="nav-links">
-        <Link to="/" onClick={scrollTop}>Home</Link>
+        <Link to="/page=1" onClick={scrollTop}>Home</Link>
         <Link to="/watchlist" onClick={scrollTop}>WatchList</Link>
         <Link to="/advancesearch" onClick={scrollTop}>Advance Search</Link>
         <button 
