@@ -22,6 +22,8 @@ function App() {
             <Route path="/watchlist" element={<WatchListPage />} />
             <Route path="/advancesearch" element={<AdvanceSearchPage />} />
             <Route path="/mangadetails/:manga_id" element={<MangaDetails />} />
+            // In your routes configuration:
+            <Route path="/manga/:manga_id" element={<MangaDetails />} />
             
             {/* Fallback routes */}
             <Route path="/addmanga" element={<HomePage />} />

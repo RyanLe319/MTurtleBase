@@ -1,27 +1,21 @@
-import React from "react";
-import "./SearchDropDown.css";
+import React from 'react';
+import MangaCardResult from './MangaCardResult';
+import './SearchDropDown.css';
 
 function SearchDropDown({ results, isLoading, onResultClick }) {
   return (
     <div className="search-dropdown">
       {isLoading ? (
-        <div className="dropdown-item">Loading...</div>
+        <div className="dropdown-loading">Loading...</div>
       ) : results.length > 0 ? (
         <>
           <div className="dropdown-results">
             {results.map((manga) => (
-              <div
-                key={manga.manga_id}
-                className="dropdown-item"
-                onClick={() => onResultClick(manga)}
-              >
-                {manga.title}
-                {manga.alternative_title && (
-                  <span className="alternative-title">
-                    {manga.alternative_title}
-                  </span>
-                )}
-              </div>
+              <MangaCardResult 
+                key={manga.manga_id} 
+                manga={manga}
+                onClick={onResultClick} // Pass the click handler
+              />
             ))}
           </div>
           <div className="dropdown-footer">
@@ -30,7 +24,7 @@ function SearchDropDown({ results, isLoading, onResultClick }) {
           </div>
         </>
       ) : (
-        <div className="dropdown-item">No results found</div>
+        <div className="dropdown-empty">No results found</div>
       )}
     </div>
   );
