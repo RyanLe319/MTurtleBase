@@ -1,48 +1,50 @@
-import React, { useState, useEffect } from "react";
-import MangaGrid from "./MangaGrid";
-import PaginationControls from "./PaginationControls";
-import "./watchListPage.css";
+import React, { useState, useEffect } from 'react';
+import MangaGrid from './MangaGrid';
+import PaginationControls from './PaginationControls';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import './watchListPage.css';
 
 function WatchListPage() {
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(() => {
-    if (localStorage.getItem('reloadingAfterAdd')) {
-      localStorage.removeItem('reloadingAfterAdd');
-      return parseInt(localStorage.getItem('lastMangaPage')) || 1;
-    }
-    return 1;
+    return parseInt(searchParams.get('page')) || 1;
   });
   const [totalPages, setTotalPages] = useState(1);
-  const [filterData] = useState({
+  const [filterData, setFilterData] = useState({
     selectedGenres: [],
     minChapters: 1,
-    currentSort: 'newest'
+    currentSort: 'newest',
+    itemsPerPage: 10
   });
-
-  useEffect(() => {
-    localStorage.setItem('lastMangaPage', currentPage);
-  }, [currentPage]);
 
   useEffect(() => {
     const fetchTotalPages = async () => {
       try {
         const response = await fetch(
-          `${BASE_URL}/api/watchlist?page=1&limit=10`
+          `${BASE_URL}/api/watchlist?page=1&limit=${filterData.itemsPerPage}`
         );
-        if (!response.ok) throw new Error("Failed to fetch watchlist");
-
         const data = await response.json();
-        setTotalPages(Math.ceil(data.pagination.total / 10));
+        setTotalPages(Math.ceil(data.pagination.total / filterData.itemsPerPage));
       } catch (err) {
-        console.error("Error fetching watchlist:", err);
+        console.error("Error:", err);
       }
     };
 
     fetchTotalPages();
-  }, []);
+    navigate(`?page=${currentPage}`, { replace: true });
+  }, [filterData.itemsPerPage, currentPage]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(Math.max(1, Math.min(newPage, totalPages)));
+  };
+
+  const handleItemsPerPageChange = (newValue) => {
+    setFilterData(prev => ({
+      ...prev,
+      itemsPerPage: newValue
+    }));
+    setCurrentPage(1);
   };
 
   return (
@@ -57,6 +59,8 @@ function WatchListPage() {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
+        itemsPerPage={filterData.itemsPerPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
       />
     </div>
   );

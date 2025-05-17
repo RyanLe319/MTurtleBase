@@ -7,7 +7,8 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
   const [mangaList, setMangaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const limit = 10; // Controls how much manga per page
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = filterData.itemsPerPage || 10; // Make this dynamic
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
@@ -25,7 +26,7 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
         });
 
         if (filterData.selectedGenres?.length > 0) {
-          params.appeand('genres', filterData.selectedGenres.join(','));
+          params.append('genres', filterData.selectedGenres.join(','));
         }
 
         const endpoint = isWatchlist
@@ -40,6 +41,9 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
 
         const data = await response.json();
         setMangaList(data.data || []);
+        // Calculate total pages from the API response
+        const totalItems = data.pagination?.total || 0;
+        setTotalPages(Math.ceil(totalItems / limit));
       } catch (err) {
         console.error("Fetch error:", err);
         setError(err.message);
@@ -50,7 +54,7 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
 
     const debounceTimer = setTimeout(fetchManga, filterData.searchQuery ? 300 : 0);
     return () => clearTimeout(debounceTimer);
-  }, [currentPage, isWatchlist, filterData.selectedGenres, filterData.minChapters, filterData.currentSort, filterData.searchQuery]);
+  }, [currentPage, limit, isWatchlist, filterData]);
 
   useEffect(() => {
     // Save current page to localStorage whenever it changes

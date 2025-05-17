@@ -465,11 +465,12 @@ app.get("/api/manga", async (req, res) => {
 			success: true,
 			data: rows,
 			pagination: {
-				page: Number(page),
-				limit: Number(limit),
-				total: rows[0]?.total_count || 0,
-			},
-		});
+			  page: Number(page),
+			  limit: Number(limit),
+			  total: rows[0]?.total_count || 0,
+			  totalPages: Math.ceil((rows[0]?.total_count || 0) / limit)
+			}
+		  });
 	} catch (err) {
 		console.error("Database error:", err);
 		res.status(500).json({

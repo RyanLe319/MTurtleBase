@@ -3,14 +3,44 @@ import {
   KeyboardDoubleArrowLeft, 
   KeyboardArrowLeft,
   KeyboardArrowRight,
-  KeyboardDoubleArrowRight 
+  KeyboardDoubleArrowRight,
+  FirstPage,
+  LastPage 
 } from '@mui/icons-material';
 import './paginationControls.css';
 
-function PaginationControls({ currentPage, totalPages, onPageChange }) {
+function PaginationControls({ 
+  currentPage, 
+  totalPages, 
+  onPageChange,
+  itemsPerPage,
+  onItemsPerPageChange 
+}) {
   return (
     <div className="pagination-container">
-      {/* Section 1: Double left arrow (back 2 pages) */}
+      <div className="items-per-page-container">
+        <span>Show:</span>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+          className="items-per-page-selector"
+        >
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+
+      {/* First Page Button */}
+      <button 
+        className="pagination-btn first-last-btn"
+        onClick={() => onPageChange(1)}
+        disabled={currentPage === 1}
+      >
+        <FirstPage />
+        <span>First</span>
+      </button>
+
       <button 
         className="pagination-btn"
         onClick={() => onPageChange(Math.max(1, currentPage - 2))}
@@ -19,7 +49,6 @@ function PaginationControls({ currentPage, totalPages, onPageChange }) {
         <KeyboardDoubleArrowLeft />
       </button>
 
-      {/* Section 2: Single left arrow (back 1 page) */}
       <button 
         className="pagination-btn"
         onClick={() => onPageChange(currentPage - 1)}
@@ -28,12 +57,10 @@ function PaginationControls({ currentPage, totalPages, onPageChange }) {
         <KeyboardArrowLeft />
       </button>
 
-      {/* Section 3: Current page display */}
       <div className="page-info">
         Page {currentPage} of {totalPages}
       </div>
 
-      {/* Section 4: Single right arrow (next page) */}
       <button 
         className="pagination-btn"
         onClick={() => onPageChange(currentPage + 1)}
@@ -42,13 +69,22 @@ function PaginationControls({ currentPage, totalPages, onPageChange }) {
         <KeyboardArrowRight />
       </button>
 
-      {/* Section 5: Double right arrow (forward 2 pages) */}
       <button 
         className="pagination-btn"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 2))}
         disabled={currentPage >= totalPages}
       >
         <KeyboardDoubleArrowRight />
+      </button>
+
+      {/* Last Page Button */}
+      <button 
+        className="pagination-btn first-last-btn"
+        onClick={() => onPageChange(totalPages)}
+        disabled={currentPage === totalPages}
+      >
+        <span>Last</span>
+        <LastPage />
       </button>
     </div>
   );
