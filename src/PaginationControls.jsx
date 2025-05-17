@@ -25,9 +25,9 @@ function PaginationControls({
           onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
           className="items-per-page-selector"
         >
-          <option value="10">10</option>
           <option value="20">20</option>
           <option value="50">50</option>
+          <option value="75">75</option>
         </select>
       </div>
 

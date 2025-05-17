@@ -16,7 +16,7 @@ function AdvanceSearchPage() {
     selectedGenres: [],
     minChapters: 0,
     searchQuery: location.state?.initialSearchQuery || searchParams.get("search") || "",
-    itemsPerPage: 10 // Add itemsPerPage to filterData
+    itemsPerPage: 20 // Add itemsPerPage to filterData
   });
   const [currentSort, setCurrentSort] = useState('newest');
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;

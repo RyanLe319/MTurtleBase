@@ -9,7 +9,7 @@ function HomePage() {
     selectedGenres: [],
     minChapters: 0,
     currentSort: 'newest',
-    itemsPerPage: 10 // Keep if used by MangaGrid
+    itemsPerPage: 20 // Keep if used by MangaGrid
   });
 
   return (
