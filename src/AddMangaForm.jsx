@@ -13,6 +13,7 @@ function AddMangaForm({ isOpen, onClose, onSuccess }) {
     image: "",
     tier: "",
     favorite: false,
+    read_list: false,
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -402,6 +403,29 @@ function AddMangaForm({ isOpen, onClose, onSuccess }) {
                 disabled={isSubmitting}
               >
                 Not Favorited
+              </button>
+            </div>
+          </div>
+
+
+          <div className="form-group">
+            <label htmlFor="read_list">Read List</label>
+            <div className="read_list-toggle">
+              <button
+                type="button"
+                className={`read_list-toggle-btn ${formData.read_list ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({...prev, read_list: true}))}
+                disabled={isSubmitting}
+              >
+                Add to Read List
+              </button>
+              <button
+                type="button"
+                className={`read_list-toggle-btn ${!formData.read_list ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({...prev, read_list: false}))}
+                disabled={isSubmitting}
+              >
+                Not Read List
               </button>
             </div>
           </div>
