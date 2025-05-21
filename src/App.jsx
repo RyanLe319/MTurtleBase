@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./Header";
 import WatchListPage from "./WatchListPage";
+import FavoritePage from "./FavoritePage";
 import HomePage from "./HomePage";
 import AdvanceSearchPage from "./AdvanceSearchPage";
 import MangaDetails from "./MangaDetails";
@@ -24,6 +25,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/watchlist" element={<WatchListPage />} />
+            <Route path="/favoritepage" element={<FavoritePage />} />
             <Route path="/advancesearch" element={<AdvanceSearchPage />} />
             <Route path="/mangadetails/:manga_id" element={<MangaDetails />} />
             <Route path="/manga/:manga_id" element={<MangaDetails />} />

@@ -535,6 +535,61 @@ app.get("/api/watchlist", async (req, res) => {
 	}
 });
 
+app.get("/api/favorites", async (req, res) => {
+	try {
+	  const { page = 1, limit = 10 } = req.query;
+	  const offset = (page - 1) * limit;
+  
+	  const query = `
+		SELECT 
+		  m.manga_id,
+		  m.title,
+		  m.alternative_title,
+		  m.cover_art_url,
+		  m.description,
+		  m.status,
+		  m.tier,
+		  CASE 
+			WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
+		  END as latest_chapter,
+		  m.latest_chapter_date,
+		  COUNT(*) OVER() as total_count
+		FROM manga m
+		JOIN watchlist w ON m.manga_id = w.manga_id
+		WHERE w.favorite = true
+		ORDER BY w.date_added_to_watchlist DESC
+		LIMIT $1 OFFSET $2
+	  `;
+  
+	  const { rows } = await db.query(query, [limit, offset]);
+  
+	  // Log the mangas retrieved for debugging
+	  console.log(`Fetched favorite mangas (page: ${page}, limit: ${limit}):`);
+	  rows.forEach(manga => {
+		console.log(`- [${manga.manga_id}] ${manga.title} (Favorite: true)`);
+	  });
+  
+	  res.json({
+		success: true,
+		data: rows,
+		pagination: {
+		  page: Number(page),
+		  limit: Number(limit),
+		  total: rows[0]?.total_count || 0,
+		},
+	  });
+	} catch (err) {
+	  console.error("Database error:", err);
+	  res.status(500).json({
+		success: false,
+		error: "Failed to fetch favorites",
+		details: process.env.NODE_ENV === "development" ? err.message : undefined,
+	  });
+	}
+  });
+  
+
 // GET endpoint for individual manga details by ID
 app.get("/api/manga/:id", async (req, res) => {
 	try {

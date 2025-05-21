@@ -32,6 +32,7 @@ function NavLinks() {
         <div className="nav-links">
           <Link to="/page=1" onClick={scrollTop}>HOME</Link>
           <Link to="/watchlist" onClick={scrollTop}>WATCHLIST</Link>
+          <Link to="/favoritepage" onClick={scrollTop}>FAVORITE</Link>
           <Link to="/advancesearch" onClick={scrollTop}>ADVANCE SEARCH</Link>
           <button 
             className="nav-link-btn" 

@@ -3,7 +3,7 @@ import "./mangaGrid.css";
 import MangaCard from "./MangaCard";
 import AddMangaForm from "./AddMangaForm";
 
-function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
+function MangaGrid({ currentPage, filterData, isWatchlist = false,  isFavorite = false }) {
   const [mangaList, setMangaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,7 +31,11 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
 
         const endpoint = isWatchlist
           ? `${BASE_URL}/api/watchlist?${params}`
-          : `${BASE_URL}/api/manga?${params}`;
+          : isFavorite
+            ? `${BASE_URL}/api/favorites?${params}`
+            : `${BASE_URL}/api/manga?${params}`;
+
+          
 
         const response = await fetch(endpoint);
 
@@ -40,6 +44,8 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
         }
 
         const data = await response.json();
+        console.log("Fetched mangas:", data.data);  // <-- add this line
+
         setMangaList(data.data || []);
         // Calculate total pages from the API response
         const totalItems = data.pagination?.total || 0;
@@ -77,7 +83,10 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false }) {
 
       const endpoint = isWatchlist
         ? `${BASE_URL}/api/watchlist?${params}`
-        : `${BASE_URL}/api/manga?${params}`;
+        : isFavorite
+          ? `${BASE_URL}/api/favorites?${params}`
+          : `${BASE_URL}/api/manga?${params}`;
+
 
       const response = await fetch(endpoint);
 

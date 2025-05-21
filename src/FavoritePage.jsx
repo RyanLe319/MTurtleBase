@@ -4,9 +4,9 @@ import PaginationControls from './PaginationControls';
 import SortBy from './SortBy';
 import GenreList from './GenreList';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import './watchListPage.css';
+import './favoritePage.css';
 
-function WatchListPage() {
+function FavoritePage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(() => {
@@ -20,25 +20,22 @@ function WatchListPage() {
     itemsPerPage: 10
   });
 
-
   useEffect(() => {
     const fetchTotalPages = async () => {
       try {
         const response = await fetch(
-          `${BASE_URL}/api/watchlist?page=1&limit=${filterData.itemsPerPage}`
+          `${BASE_URL}/api/favorites?page=1&limit=${filterData.itemsPerPage}`
         );
-        console.log("BASE_URL in WatchListPage:", BASE_URL);
-
         const data = await response.json();
         setTotalPages(Math.ceil(data.pagination.total / filterData.itemsPerPage));
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Error fetching favorites:", err);
       }
     };
 
     fetchTotalPages();
     navigate(`?page=${currentPage}`, { replace: true });
-  }, [filterData.itemsPerPage, currentPage]);
+  }, [filterData.itemsPerPage, currentPage, navigate]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(Math.max(1, Math.min(newPage, totalPages)));
@@ -52,37 +49,37 @@ function WatchListPage() {
     setCurrentPage(1);
   };
 
-return (
-  <div className="watchlist-container">
-    <h1>Your Watchlist</h1>
-    
-    <div className="watchlist-filters">
-      <GenreList 
-        onSubmitData={(data) => setFilterData(prev => ({...prev, ...data}))}
-        initialGenres={filterData.selectedGenres}
-        initialMinChapters={filterData.minChapters}
+  return (
+    <div className="favorite-container">
+      <h1>Your Favorites</h1>
+      
+      <div className="favorite-filters">
+        <GenreList 
+          onSubmitData={(data) => setFilterData(prev => ({...prev, ...data}))}
+          initialGenres={filterData.selectedGenres}
+          initialMinChapters={filterData.minChapters}
+        />
+        <SortBy 
+          currentSort={filterData.currentSort} 
+          onSortChange={(sort) => setFilterData(prev => ({...prev, currentSort: sort}))}
+        />
+      </div>
+      
+      <MangaGrid 
+        currentPage={currentPage} 
+        isFavorite={true}
+        filterData={filterData}
       />
-      <SortBy 
-        currentSort={filterData.currentSort} 
-        onSortChange={(sort) => setFilterData(prev => ({...prev, currentSort: sort}))}
+      
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        itemsPerPage={filterData.itemsPerPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
       />
     </div>
-    
-    <MangaGrid 
-      currentPage={currentPage} 
-      isWatchlist={true}
-      filterData={filterData}
-    />
-    
-    <PaginationControls
-      currentPage={currentPage}
-      totalPages={totalPages}
-      onPageChange={handlePageChange}
-      itemsPerPage={filterData.itemsPerPage}
-      onItemsPerPageChange={handleItemsPerPageChange}
-    />
-  </div>
-);
+  );
 }
 
-export default WatchListPage;
+export default FavoritePage;
