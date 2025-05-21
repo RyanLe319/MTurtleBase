@@ -50,69 +50,71 @@ app.get("/", async (req, res) => {
 // Route to add a manga to the database
 app.post("/adding-manga", async (req, res) => {
 	try {
-		// Deconstruct and store fields from request body
-		const {
-			title,
-			lastChapterRead,
-			lastReadDate,
-			status,
-			latestChapter,
-			latestChapterDate,
-			description,
-			image,
-			genres,
-			tier,
-		} = req.body;
-
-		console.log(req.body);
-
-		// Ensure required fields are present
-		if (!title) {
-			return res.status(400).json({
-				error: "Title is required",
-				details: "No title was provided in the request body",
-			});
-		}
-
-		// Start transaction , transaction 100% complete or no deal
-		await db.query("BEGIN");
-
-		// Insert manga into the 'manga' table
-		const mangaResult = await db.query(
-			`INSERT INTO manga (
-        title, 
-        description,
-        cover_art_url,
-        status,
-        latest_chapter,
-        latest_chapter_date,
+	  // Deconstruct and store fields from request body
+	  const {
+		title,
+		lastChapterRead,
+		lastReadDate,
+		status,
+		latestChapter,
+		latestChapterDate,
+		description,
+		image,
+		genres,
 		tier,
-        record_created
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
-      RETURNING manga_id`,
-			[
-				title,
-				description || null,
-				image || null,
-				status || null,
-				latestChapter || 0,
-				latestChapterDate || null,
-				tier || null
-			]
-		);
-
-		const mangaId = mangaResult.rows[0].manga_id;
-
-		// Insert manga into the watchlist
-		await db.query(
-			`INSERT INTO watchlist (
-        manga_id,
-        last_chapter_read,
-        date_added_to_watchlist
-      ) VALUES ($1, $2, NOW())`,
-			[mangaId, lastChapterRead || 0]
-		);
-
+	  } = req.body;
+  
+	  // Convert chapter numbers to decimals
+	  const lastChapterReadDecimal = lastChapterRead ? parseFloat(lastChapterRead) : 0;
+	  const latestChapterDecimal = latestChapter ? parseFloat(latestChapter) : 0;
+  
+	  // Ensure required fields are present
+	  if (!title) {
+		return res.status(400).json({
+		  error: "Title is required",
+		  details: "No title was provided in the request body",
+		});
+	  }
+  
+	  // Start transaction
+	  await db.query("BEGIN");
+  
+	  // Insert manga into the 'manga' table
+	  const mangaResult = await db.query(
+		`INSERT INTO manga (
+		  title, 
+		  description,
+		  cover_art_url,
+		  status,
+		  latest_chapter,
+		  latest_chapter_date,
+		  tier,
+		  record_created
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
+		RETURNING manga_id`,
+		[
+		  title,
+		  description || null,
+		  image || null,
+		  status || null,
+		  latestChapterDecimal, // Use converted decimal value
+		  latestChapterDate || null,
+		  tier || null
+		]
+	  );
+  
+	  const mangaId = mangaResult.rows[0].manga_id;
+  
+	  // Insert manga into the watchlist with decimal chapter
+	  await db.query(
+		`INSERT INTO watchlist (
+		  manga_id,
+		  last_chapter_read,
+		  date_added_to_watchlist
+		) VALUES ($1, $2, NOW())`,
+		[mangaId, lastChapterReadDecimal] // Use converted decimal value
+	  );
+  
 		// If manga has a status "WatchList", add it to the watchlist and update is_watched to true
 		if (status === "WatchList") {
 			try {
@@ -400,22 +402,28 @@ app.get("/api/manga", async (req, res) => {
 		const currentSort = sortOptions[sort] || sortOptions.newest;
 
 		let query = `
-      SELECT 
-        m.manga_id,
-        m.title,
-        m.alternative_title,
-        m.cover_art_url,
-        m.description,
-        m.status,
-		m.tier,
-        COALESCE(m.latest_chapter, 0) as latest_chapter,
-        m.latest_chapter_date,
-        w.last_chapter_read,
-        w.date_added_to_watchlist,
-        COUNT(*) OVER() as total_count
-      FROM manga m
-      LEFT JOIN watchlist w ON m.manga_id = w.manga_id
-    `;
+		SELECT 
+		  m.manga_id,
+		  m.title,
+		  m.alternative_title,
+		  m.cover_art_url,
+		  m.description,
+		  m.status,
+		  m.tier,
+		  CASE 
+			WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
+		  END as latest_chapter,
+		  m.latest_chapter_date,
+		  CASE 
+			WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
+		  END as last_chapter_read,
+		  w.date_added_to_watchlist,
+		  COUNT(*) OVER() as total_count
+		FROM manga m
+		LEFT JOIN watchlist w ON m.manga_id = w.manga_id
+	  `;
 
 		const whereClauses = [];
 		const queryParams = [];
@@ -484,52 +492,58 @@ app.get("/api/manga", async (req, res) => {
 // GET endpoint to retrieve user's watchlist
 app.get("/api/watchlist", async (req, res) => {
 	try {
-		const { page = 1, limit = 10 } = req.query;
-		const offset = (page - 1) * limit;
-
-		const query = `
-      SELECT 
-        m.manga_id,
-        m.title,
-        m.alternative_title,
-        m.cover_art_url,
-        m.description,
-        m.status,
-		m.tier,
-        COALESCE(m.latest_chapter, 0) as latest_chapter,
-        m.latest_chapter_date,
-        w.last_chapter_read,
-        w.date_added_to_watchlist,
-        w.is_watched,
-        COUNT(*) OVER() as total_count
-      FROM manga m
-      JOIN watchlist w ON m.manga_id = w.manga_id
-      WHERE w.is_watched = true
-      ORDER BY w.date_added_to_watchlist DESC
-      LIMIT $1 OFFSET $2
-    `;
-
-		const { rows } = await db.query(query, [limit, offset]);
-
-		res.json({
-			success: true,
-			data: rows,
-			pagination: {
-				page: Number(page),
-				limit: Number(limit),
-				total: rows[0]?.total_count || 0,
-			},
-		});
+	  const { page = 1, limit = 10 } = req.query;
+	  const offset = (page - 1) * limit;
+  
+	  const query = `
+		SELECT 
+		  m.manga_id,
+		  m.title,
+		  m.alternative_title,
+		  m.cover_art_url,
+		  m.description,
+		  m.status,
+		  m.tier,
+		  CASE 
+			WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
+		  END as latest_chapter,
+		  m.latest_chapter_date,
+		  CASE 
+			WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
+		  END as last_chapter_read,
+		  w.date_added_to_watchlist,
+		  w.is_watched,
+		  COUNT(*) OVER() as total_count
+		FROM manga m
+		JOIN watchlist w ON m.manga_id = w.manga_id
+		WHERE w.is_watched = true
+		ORDER BY w.date_added_to_watchlist DESC
+		LIMIT $1 OFFSET $2
+	  `;
+  
+	  const { rows } = await db.query(query, [limit, offset]);
+  
+	  res.json({
+		success: true,
+		data: rows,
+		pagination: {
+		  page: Number(page),
+		  limit: Number(limit),
+		  total: rows[0]?.total_count || 0,
+		},
+	  });
 	} catch (err) {
-		console.error("Database error:", err);
-		res.status(500).json({
-			success: false,
-			error: "Failed to fetch watchlist",
-			details: process.env.NODE_ENV === "development" ? err.message : undefined,
-		});
+	  console.error("Database error:", err);
+	  res.status(500).json({
+		success: false,
+		error: "Failed to fetch watchlist",
+		details: process.env.NODE_ENV === "development" ? err.message : undefined,
+	  });
 	}
-});
-
+  });
+  
 // GET endpoint for individual manga details by ID
 app.get("/api/manga/:id", async (req, res) => {
 	try {
@@ -537,14 +551,21 @@ app.get("/api/manga/:id", async (req, res) => {
 
 		// Fetch main manga info
 		const mangaQuery = `
-      SELECT 
-        m.*,
-        w.last_chapter_read,
-        w.date_added_to_watchlist
-      FROM manga m
-      LEFT JOIN watchlist w ON m.manga_id = w.manga_id
-      WHERE m.manga_id = $1
-    `;
+		SELECT 
+			m.*,
+			CASE 
+			WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
+			END as last_chapter_read,
+			w.date_added_to_watchlist,
+			CASE 
+			WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
+			END as latest_chapter
+		FROM manga m
+		LEFT JOIN watchlist w ON m.manga_id = w.manga_id
+		WHERE m.manga_id = $1
+		`;
 
 		const mangaResult = await db.query(mangaQuery, [mangaId]);
 

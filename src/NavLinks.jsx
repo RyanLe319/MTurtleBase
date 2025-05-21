@@ -27,32 +27,34 @@ function NavLinks() {
   };
 
   return (
-    <>
-      <div className="nav-links">
-        <Link to="/page=1" onClick={scrollTop}>Home</Link>
-        <Link to="/watchlist" onClick={scrollTop}>WatchList</Link>
-        <Link to="/advancesearch" onClick={scrollTop}>Advance Search</Link>
-        <button 
-          className="nav-link-btn" 
-          onClick={handleAddMangaClick}
-        >
-          Add Manga
-        </button>
-      </div>
-      
-      <AddMangaForm 
-        isOpen={showForm} 
-        onClose={() => setShowForm(false)}
-        onSuccess={handleFormSubmitSuccess}
-      />
-      
-      {showSuccess && (
-        <Notification 
-          message="Manga added successfully!" 
-          type="success" 
+    <div className="nav-links-header">
+      <>
+        <div className="nav-links">
+          <Link to="/page=1" onClick={scrollTop}>Home</Link>
+          <Link to="/watchlist" onClick={scrollTop}>WatchList</Link>
+          <Link to="/advancesearch" onClick={scrollTop}>Advance Search</Link>
+          <button 
+            className="nav-link-btn" 
+            onClick={handleAddMangaClick}
+          >
+            Add Manga
+          </button>
+        </div>
+        
+        <AddMangaForm 
+          isOpen={showForm} 
+          onClose={() => setShowForm(false)}
+          onSuccess={handleFormSubmitSuccess}
         />
-      )}
-    </>
+        
+        {showSuccess && (
+          <Notification 
+            message="Manga added successfully!" 
+            type="success" 
+          />
+        )}
+      </>
+    </div>
   );
 }
 

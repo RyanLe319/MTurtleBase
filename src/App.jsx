@@ -8,6 +8,7 @@ import MangaDetails from "./MangaDetails";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
 import ResultPage from "./ResultPage";
+import NavLinks from "./NavLinks";
 import "./App.css";
 
 function App() {
@@ -16,6 +17,8 @@ function App() {
       <ScrollToTop />
       <div className="container">
         <Header />
+        <NavLinks />
+
         
         <div className="body-section">
           <Routes>

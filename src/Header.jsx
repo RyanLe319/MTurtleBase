@@ -64,12 +64,7 @@ function Header() {
             e.preventDefault();
             setShowDropdown(false);
             if (searchInput.trim()) {
-                navigate('/advancesearch', {
-                  state: {
-                    initialSearchQuery: searchInput.trim(),
-                    initialPage: 1
-                  }
-                });
+                navigate(`/search-results?query=${encodeURIComponent(searchInput.trim())}&page=1`);
                 setSearchInput("");
             }
         }
@@ -148,7 +143,7 @@ function Header() {
                         />
                     )}
                 </div>
-                <NavLinks />
+                {/* <NavLinks /> */}
             </div>
         </div>
     );

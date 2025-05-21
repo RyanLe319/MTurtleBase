@@ -4,9 +4,12 @@
   align-items: center;
   padding: 1rem 2rem;
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+
+     0  2px 4px rgba(0, 0, 0, 0.05);  /* bottom */
   position: relative;
 }
+
 
 .left-group {
   flex: 1; /* Takes up available space */
@@ -59,6 +62,7 @@
 /* Search icon color */
 .search-container .MuiSvgIcon-root {
   color: #b0d2f7;
+  
 }
 
 /* Focus state for the search field */
