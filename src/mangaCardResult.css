@@ -61,4 +61,5 @@
   color: #1976d2;
   font-weight: 500;
   margin-top: auto; /* Pushes chapter info to bottom */
+  padding-left: 15px;
 }

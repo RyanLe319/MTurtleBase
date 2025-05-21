@@ -92,7 +92,13 @@
 
 .corner-badge.status[data-status="WatchList"] {
     background-color: #ffb300 !important; /* Yellow for WatchList */
+    
 }
+
+.corner-badge.status[data-status="Hiatus"] {
+    background-color: #9E9E9E  !important; /* Black for Dropped */
+}
+
 
 .corner-badge.status[data-status="Dropped"] {
     background-color: #212121 !important; /* Black for Dropped */

@@ -9,6 +9,7 @@ import MangaDetails from "./MangaDetails";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
 import ResultPage from "./ResultPage";
+import ReadListPage from "./ReadListPage"
 import NavLinks from "./NavLinks";
 import "./App.css";
 
@@ -26,6 +27,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/watchlist" element={<WatchListPage />} />
             <Route path="/favoritepage" element={<FavoritePage />} />
+            <Route path="/readlist" element={<ReadListPage />} />
             <Route path="/advancesearch" element={<AdvanceSearchPage />} />
             <Route path="/mangadetails/:manga_id" element={<MangaDetails />} />
             <Route path="/manga/:manga_id" element={<MangaDetails />} />

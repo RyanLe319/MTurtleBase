@@ -107,9 +107,11 @@ function MangaCard({ manga , onDeleteSuccess }) {
             Last Chapter Read: {manga.last_chapter_read || "0"} 
           </h2>
           <p className="chapter-difference">
-            Unread: {unreadChapters} 
+            Unread: {Number.isInteger(unreadChapters) 
+              ? unreadChapters 
+              : unreadChapters.toFixed(2).replace(/\.?0+$/, '')}
           </p>
-          <h2 className="sub-titles">
+                  <h2 className="sub-titles">
             Latest Chapter Available: {manga.latest_chapter || "0"}  
             { manga.latest_chapter_date && ` - (${formatDate(manga.latest_chapter_date)})`}
           </h2>

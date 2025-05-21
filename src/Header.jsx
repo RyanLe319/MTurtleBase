@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./header.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import WebsiteLogo from "./WebsiteLogo";
 import NavLinks from "./NavLinks";
 import SearchDropDown from "./SearchDropDown";
+
 
 function Header() {
     const [searchInput, setSearchInput] = useState("");
@@ -92,13 +93,19 @@ function Header() {
         }, 150);
     };
 
+    const scrollTop = () => {
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	};
+
     return (
         <div className="header">
             <div className="left-group">
                 <WebsiteLogo />
             </div>
             
-            <h1 className="title">MTurtleBase</h1>
+            <Link to="/" onClick={scrollTop} className="title">
+                <h1>MTurtleBase</h1>
+            </Link>
             
             <div className="right-group">
                 <div className="search-container" ref={dropdownRef}>

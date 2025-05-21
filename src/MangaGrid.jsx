@@ -3,7 +3,7 @@ import "./mangaGrid.css";
 import MangaCard from "./MangaCard";
 import AddMangaForm from "./AddMangaForm";
 
-function MangaGrid({ currentPage, filterData, isWatchlist = false,  isFavorite = false }) {
+function MangaGrid({ currentPage, filterData, isWatchlist = false,  isFavorite = false, isRead = false }) {
   const [mangaList, setMangaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,11 +29,17 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false,  isFavorite =
           params.append('genres', filterData.selectedGenres.join(','));
         }
 
-        const endpoint = isWatchlist
-          ? `${BASE_URL}/api/watchlist?${params}`
-          : isFavorite
-            ? `${BASE_URL}/api/favorites?${params}`
-            : `${BASE_URL}/api/manga?${params}`;
+        let endpoint;
+          if (isWatchlist) {
+            endpoint = `${BASE_URL}/api/watchlist?${params}`;
+          } else if (isFavorite) {
+            endpoint = `${BASE_URL}/api/favorites?${params}`;
+          } else if (isRead) {
+            endpoint = `${BASE_URL}/api/readlist?${params}`;
+          } else {
+            endpoint = `${BASE_URL}/api/manga?${params}`;
+          }
+
 
           
 
@@ -81,11 +87,16 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false,  isFavorite =
         params.append('genres', filterData.selectedGenres.join(','));
       }
 
-      const endpoint = isWatchlist
-        ? `${BASE_URL}/api/watchlist?${params}`
-        : isFavorite
-          ? `${BASE_URL}/api/favorites?${params}`
-          : `${BASE_URL}/api/manga?${params}`;
+      let endpoint;
+          if (isWatchlist) {
+            endpoint = `${BASE_URL}/api/watchlist?${params}`;
+          } else if (isFavorite) {
+            endpoint = `${BASE_URL}/api/favorites?${params}`;
+          } else if (isRead) {
+            endpoint = `${BASE_URL}/api/readlist?${params}`;
+          } else {
+            endpoint = `${BASE_URL}/api/manga?${params}`;
+          }
 
 
       const response = await fetch(endpoint);

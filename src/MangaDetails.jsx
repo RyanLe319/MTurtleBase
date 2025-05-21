@@ -22,6 +22,7 @@ function MangaDetails() {
   const [coverArtTempUrl, setCoverArtTempUrl] = useState("");
 
 
+
   useEffect(() => {
     const fetchMangaDetails = async () => {
       try {
@@ -53,6 +54,59 @@ function MangaDetails() {
     fetchGenres();
   }, [manga_id, BASE_URL]);
 
+  const toggleFavorite = async () => {
+    if (!manga || manga.favorite === undefined) return;
+    
+    try {
+      setIsSaving(true);
+      const response = await fetch(`${BASE_URL}/api/manga/${manga_id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ favorite: !manga.favorite }),
+      });
+  
+      if (!response.ok) throw new Error('Failed to update favorite status');
+  
+      const updatedManga = await response.json();
+      setManga(prev => ({ ...prev, favorite: updatedManga.manga.favorite }));
+    } catch (err) {
+      console.error("Error updating favorite status:", err);
+      // Optionally show error to user
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleRead = async () => {
+    console.log("Toggle Read clicked"); // Debug log
+    if (!manga || manga.read_list === undefined) {
+      console.log("Cannot toggle - manga not loaded or read_list undefined");
+      return;
+    }
+    
+    try {
+      setIsSaving(true);
+      console.log("Sending read_list update:", !manga.read_list); // Debug log
+      
+      const response = await fetch(`${BASE_URL}/api/manga/${manga_id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ read_list: !manga.read_list }),
+      });
+  
+      if (!response.ok) throw new Error('Failed to update read_list status');
+  
+      const updatedManga = await response.json();
+      console.log("Update successful:", updatedManga); // Debug log
+      setManga(prev => ({ ...prev, read_list: updatedManga.manga.read_list }));
+    } catch (err) {
+      console.error("Error updating read_list:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (genreInput.trim() === "") {
@@ -137,44 +191,6 @@ function MangaDetails() {
     setTempValue(e.target.value);
   };
 
-  const toggleFavorite = async () => {
-    if (!manga || manga.favorite === undefined || isSaving) return;
-    
-    try {
-      setIsSaving(true);
-      const newFavoriteStatus = !manga.favorite;
-      
-      // Optimistic UI update
-      setManga(prev => ({ ...prev, favorite: newFavoriteStatus }));
-      
-      const response = await fetch(`${BASE_URL}/api/manga/${manga_id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ favorite: newFavoriteStatus }),
-      });
-  
-      if (!response.ok) {
-        // Revert on failure
-        setManga(prev => ({ ...prev, favorite: !newFavoriteStatus }));
-        throw new Error('Failed to update favorite status');
-      }
-  
-      // Parse the response and update the full manga state
-      const data = await response.json();
-      if (data.manga) {
-        setManga(prev => ({
-          ...prev,
-          favorite: data.manga.favorite,  // Ensure favorite is updated
-          ...data.manga                  // Merge other fields if needed
-        }));
-      }
-    } catch (err) {
-      console.error("Error:", err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleEditSave();
@@ -227,6 +243,7 @@ function MangaDetails() {
               <option value="Ongoing">Ongoing</option>
               <option value="Completed">Completed</option>
               <option value="WatchList">WatchList</option>
+              <option value="Hiatus">Hiatus</option>
               <option value="Dropped">Dropped</option>
             </select>
             <div className="edit-buttons">
@@ -457,6 +474,9 @@ function MangaDetails() {
       setIsSaving(false);
     }
   };
+  
+
+  console.log("Current manga state:", manga);
 
   return (
     <div className="page-container">
@@ -525,28 +545,36 @@ function MangaDetails() {
             )}
             
             <div className="status-favorite-container">
-              <div 
-                className={`status-badge ${editingField === 'status' ? 'editing' : ''}`} 
-                data-status={editingField === 'status' ? '' : manga.status}
-              >
-                {renderEditableField("Status", "status", manga.status)}
-              </div>
-              
-              <button 
-                className={`favorite-button ${manga.favorite ? 'favorited' : ''}`}
-                onClick={toggleFavorite}
-                disabled={isSaving}
-                title={manga.favorite ? "Remove from favorites" : "Add to favorites"}
-              >
-                {isSaving ? (
-                  'Saving...'
-                ) : (
-                  <>
-                    {manga.favorite ? '★ Favorited' : '☆ Not Favorited'}
-                  </>
-                )}
-              </button>
+            <div 
+              className={`status-badge ${editingField === 'status' ? 'editing' : ''}`} 
+              data-status={editingField === 'status' ? '' : manga.status}
+            >
+              {renderEditableField("Status", "status", manga.status)}
             </div>
+            
+            <div 
+              className={`favorite-indicator ${manga.favorite ? 'favorited' : ''}`}
+              onClick={toggleFavorite}
+              title={manga.favorite ? "Click to remove from favorites" : "Click to add to favorites"}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                'Saving...'
+              ) : manga.favorite ? (
+                '★ Favorited'
+              ) : (
+                '☆ Not Favorited'
+              )}
+            </div>
+            <div
+              className={`readlist-indicator ${manga.read_list ? 'readlisted' : ''}`}
+              onClick={toggleRead}
+              title={manga.read_list ? "Click to remove from Read List" : "Click to add to Read List"}
+            >
+              {isSaving ? 'Saving...' : manga.read_list ? '📚 In Read List' : '➕ Add to Read List'}
+            </div>
+
+          </div>
             
             <div className="tier-section">
               <Rating currentTier={currentTier} onTierChange={handleTierChange} />

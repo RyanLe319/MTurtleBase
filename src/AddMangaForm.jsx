@@ -379,6 +379,7 @@ function AddMangaForm({ isOpen, onClose, onSuccess }) {
               <option value="Ongoing">Ongoing</option>
               <option value="Completed">Completed</option>
               <option value="WatchList">WatchList</option>
+              <option value="Hiatus">Hiatus</option>
               <option value="Dropped">Dropped</option>
             </select>
           </div>

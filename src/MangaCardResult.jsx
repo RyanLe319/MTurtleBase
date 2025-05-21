@@ -34,7 +34,8 @@ function MangaCardResult({ manga, onClick }) {
           <p className="alternative-title">{manga.alternative_title}</p>
         )}
         <p className="chapter-info">
-          Latest: Ch. {manga.latest_chapter || "N/A"}
+          Latest: Ch. {manga.latest_chapter || "N/A"} <br />
+          Last Reach: Ch. {manga.last_chapter_read || "N/A"}
         </p>
       </div>
     </div>
