@@ -476,7 +476,6 @@ function MangaDetails() {
   };
   
 
-  console.log("Current manga state:", manga);
 
   return (
     <div className="page-container">

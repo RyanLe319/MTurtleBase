@@ -436,15 +436,20 @@ app.get("/api/manga", async (req, res) => {
 
 		if (genreList.length > 0) {
 			whereClauses.push(`
-				m.manga_id IN (
-					SELECT mg.manga_id 
-					FROM mangagenres mg
-					JOIN genres g ON mg.genre_id = g.genre_id
-					WHERE g.genre_name = ANY($${queryParams.length + 1})
-				)
+			  m.manga_id IN (
+				SELECT mg.manga_id 
+				FROM mangagenres mg
+				JOIN genres g ON mg.genre_id = g.genre_id
+				WHERE g.genre_name = ANY($${queryParams.length + 1})
+				GROUP BY mg.manga_id
+				HAVING COUNT(DISTINCT g.genre_name) = ${genreList.length}
+			  )
 			`);
 			queryParams.push(genreList);
 		}
+
+
+
 
 		if (minChaptersNum > 0) {
 			whereClauses.push(`m.latest_chapter >= $${queryParams.length + 1}`);
@@ -460,6 +465,10 @@ app.get("/api/manga", async (req, res) => {
 		query += ` LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}`;
 
 		const { rows } = await db.query(query, queryParams);
+
+		
+
+
 
 		res.json({
 			success: true,
