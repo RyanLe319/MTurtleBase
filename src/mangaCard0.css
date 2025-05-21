@@ -1,18 +1,29 @@
 /* Manga Card Container - Strict Dimensions */
 .manga-card {
     display: flex;
-    height: 285px;
     width: 100%;
     max-width: 100%;
     position: relative;
     background: white;
     border-radius: 2px;
-    box-shadow: 4px -4px 12px rgba(176, 210, 247, 0.1),
-                4px 4px 12px rgba(176, 210, 247, 0.1),
-                -4px 4px 12px rgba(176, 210, 247, 0.1);
-                overflow: visible; /* Changed from hidden */
-
+    box-shadow: 
+        4px -4px 24px rgba(176, 210, 247, 0.35),  /* top-right */
+        4px 4px 24px rgba(176, 210, 247, 0.35),   /* bottom-right */
+        -4px 4px 24px rgba(176, 210, 247, 0.35),  /* bottom-left */
+        -4px -4px 24px rgba(176, 210, 247, 0.35); /* top-left */
+    overflow: visible; /* Changed from hidden */
     box-sizing: border-box;
+    
+}
+
+.manga-card.favorite {
+    border: 4px solid transparent;
+
+    /* Animate the color of the glow */
+    animation: rainbow-border 3s linear infinite;
+    
+    /* Rainbow glow box-shadow */
+    box-shadow: 0 0 12px 4px currentColor;
 }
 
 /* Image Section - Strict 27% Width */
@@ -45,7 +56,10 @@
     overflow: hidden;
 }
 
-/* Status Badge */
+
+/* Status Badge with favorite animation */
+/* Update your corner-badge styles like this: */
+
 .corner-badge {
     position: absolute;
     top: 0;
@@ -53,7 +67,6 @@
     width: 60px;
     height: 50px;
     border-radius: 50%;
-    background: #1976d2;
     color: white;
     display: flex;
     align-items: center;
@@ -62,10 +75,62 @@
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     z-index: 2;
-    /* New positioning - center point at card corner */
     transform: translate(50%, -50%);
-    /* Remove overflow: hidden from parent if it exists */
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    /* Add these to ensure visibility */
 }
+
+/* Status colors (reapplied even when favorited) */
+.corner-badge.status[data-status="Ongoing"] {
+    background-color: #1565c0 !important; /* Blue for Ongoing */
+}
+
+.corner-badge.status[data-status="Completed"] {
+    background-color: #388e3c !important; /* Green for Completed */
+}
+
+.corner-badge.status[data-status="WatchList"] {
+    background-color: #ffb300 !important; /* Yellow for WatchList */
+}
+
+.corner-badge.status[data-status="Dropped"] {
+    background-color: #212121 !important; /* Black for Dropped */
+}
+
+
+/* Enhanced rainbow animation */
+@keyframes rainbow-border {
+    0% {
+        border-color: #ff4d4d;
+        box-shadow: 0 0 8px #ff4d4d;
+    }
+    16.6% {
+        border-color: #ff9a4d;
+        box-shadow: 0 0 8px #ff9a4d;
+    }
+    33.3% {
+        border-color: #ffdf4d;
+        box-shadow: 0 0 8px #ffdf4d;
+    }
+    50% {
+        border-color: #a3ff4d;
+        box-shadow: 0 0 8px #a3ff4d;
+    }
+    66.6% {
+        border-color: #4ddbff;
+        box-shadow: 0 0 8px #4ddbff;
+    }
+    83.3% {
+        border-color: #7d4dff;
+        box-shadow: 0 0 8px #7d4dff;
+    }
+    100% {
+        border-color: #ff4d4d;
+        box-shadow: 0 0 8px #ff4d4d;
+    }
+}
+
 
 /* Title Section - Strict Truncation */
 .title-group {

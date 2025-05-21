@@ -53,6 +53,7 @@ function MangaDetails() {
     fetchGenres();
   }, [manga_id, BASE_URL]);
 
+
   useEffect(() => {
     if (genreInput.trim() === "") {
       setFilteredGenres(allGenres);
@@ -134,6 +135,44 @@ function MangaDetails() {
 
   const handleInputChange = (e) => {
     setTempValue(e.target.value);
+  };
+
+  const toggleFavorite = async () => {
+    if (!manga || manga.favorite === undefined || isSaving) return;
+    
+    try {
+      setIsSaving(true);
+      const newFavoriteStatus = !manga.favorite;
+      
+      // Optimistic UI update
+      setManga(prev => ({ ...prev, favorite: newFavoriteStatus }));
+      
+      const response = await fetch(`${BASE_URL}/api/manga/${manga_id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ favorite: newFavoriteStatus }),
+      });
+  
+      if (!response.ok) {
+        // Revert on failure
+        setManga(prev => ({ ...prev, favorite: !newFavoriteStatus }));
+        throw new Error('Failed to update favorite status');
+      }
+  
+      // Parse the response and update the full manga state
+      const data = await response.json();
+      if (data.manga) {
+        setManga(prev => ({
+          ...prev,
+          favorite: data.manga.favorite,  // Ensure favorite is updated
+          ...data.manga                  // Merge other fields if needed
+        }));
+      }
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -485,11 +524,28 @@ function MangaDetails() {
               </h2>
             )}
             
-            <div 
-              className={`status-badge ${editingField === 'status' ? 'editing' : ''}`} 
-              data-status={editingField === 'status' ? '' : manga.status}
-            >
-              {renderEditableField("Status", "status", manga.status)}
+            <div className="status-favorite-container">
+              <div 
+                className={`status-badge ${editingField === 'status' ? 'editing' : ''}`} 
+                data-status={editingField === 'status' ? '' : manga.status}
+              >
+                {renderEditableField("Status", "status", manga.status)}
+              </div>
+              
+              <button 
+                className={`favorite-button ${manga.favorite ? 'favorited' : ''}`}
+                onClick={toggleFavorite}
+                disabled={isSaving}
+                title={manga.favorite ? "Remove from favorites" : "Add to favorites"}
+              >
+                {isSaving ? (
+                  'Saving...'
+                ) : (
+                  <>
+                    {manga.favorite ? '★ Favorited' : '☆ Not Favorited'}
+                  </>
+                )}
+              </button>
             </div>
             
             <div className="tier-section">

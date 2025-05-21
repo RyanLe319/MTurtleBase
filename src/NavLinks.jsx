@@ -30,14 +30,14 @@ function NavLinks() {
     <div className="nav-links-header">
       <>
         <div className="nav-links">
-          <Link to="/page=1" onClick={scrollTop}>Home</Link>
-          <Link to="/watchlist" onClick={scrollTop}>WatchList</Link>
-          <Link to="/advancesearch" onClick={scrollTop}>Advance Search</Link>
+          <Link to="/page=1" onClick={scrollTop}>HOME</Link>
+          <Link to="/watchlist" onClick={scrollTop}>WATCHLIST</Link>
+          <Link to="/advancesearch" onClick={scrollTop}>ADVANCE SEARCH</Link>
           <button 
             className="nav-link-btn" 
             onClick={handleAddMangaClick}
           >
-            Add Manga
+            ADD MANGA
           </button>
         </div>
         

@@ -24,3 +24,9 @@
 - `rgba(176, 210, 247, 0.2)` (Button active tint)
 - `rgba(176, 210, 247, 0.3)` (Popup shadow)
 - `rgba(255, 255, 255, 0.3)` (Spinner border)
+
+### Status Badge Colors
+- **Ongoing:** `#1976d2` (Blue background), White text
+- **Completed:** `#4caf50` (Green background), White text
+- **WatchList:** `#ff9800` (Orange background), White text
+- **Dropped:** `#f44336` (Red background), White text

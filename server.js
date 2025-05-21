@@ -49,329 +49,323 @@ app.get("/", async (req, res) => {
 
 // Route to add a manga to the database
 app.post("/adding-manga", async (req, res) => {
-	try {
-	  // Deconstruct and store fields from request body
-	  const {
-		title,
-		lastChapterRead,
-		lastReadDate,
-		status,
-		latestChapter,
-		latestChapterDate,
-		description,
-		image,
-		genres,
-		tier,
-	  } = req.body;
-  
-	  // Convert chapter numbers to decimals
-	  const lastChapterReadDecimal = lastChapterRead ? parseFloat(lastChapterRead) : 0;
-	  const latestChapterDecimal = latestChapter ? parseFloat(latestChapter) : 0;
-  
-	  // Ensure required fields are present
-	  if (!title) {
-		return res.status(400).json({
-		  error: "Title is required",
-		  details: "No title was provided in the request body",
-		});
-	  }
-  
-	  // Start transaction
-	  await db.query("BEGIN");
-  
-	  // Insert manga into the 'manga' table
-	  const mangaResult = await db.query(
-		`INSERT INTO manga (
-		  title, 
-		  description,
-		  cover_art_url,
-		  status,
-		  latest_chapter,
-		  latest_chapter_date,
-		  tier,
-		  record_created
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
-		RETURNING manga_id`,
-		[
-		  title,
-		  description || null,
-		  image || null,
-		  status || null,
-		  latestChapterDecimal, // Use converted decimal value
-		  latestChapterDate || null,
-		  tier || null
-		]
-	  );
-  
-	  const mangaId = mangaResult.rows[0].manga_id;
-  
-	  // Insert manga into the watchlist with decimal chapter
-	  await db.query(
-		`INSERT INTO watchlist (
-		  manga_id,
-		  last_chapter_read,
-		  date_added_to_watchlist
-		) VALUES ($1, $2, NOW())`,
-		[mangaId, lastChapterReadDecimal] // Use converted decimal value
-	  );
-  
-		// If manga has a status "WatchList", add it to the watchlist and update is_watched to true
-		if (status === "WatchList") {
-			try {
-				// Update is_watched to true for the manga
-				await db.query(
-					`UPDATE watchlist
-          SET is_watched = true
-          WHERE manga_id = $1`,
-					[mangaId]
-				);
-			} catch (error) {
-				console.error("Error updating watchlist or is_watched:", error);
-				res.status(500).json({
-					error: "Failed to add manga to watchlist or update is_watched",
-					details: error.message,
-				});
-			}
-		}
+  try {
+    // Deconstruct and store fields from request body
+    const {
+      title,
+      lastChapterRead,
+      lastReadDate,
+      status,
+      latestChapter,
+      latestChapterDate,
+      description,
+      image,
+      genres,
+      tier,
+      favorite, // Added favorite field
+    } = req.body;
 
-		// Insert genres if provided
-		if (genres && genres.length > 0) {
-			// use for of with async functions as it waits for the async op to finish before moving to the next iteration
-			for (const genreName of genres) {
-				// Check if genre already exists
-				const genreCheck = await db.query(
-					"SELECT genre_id FROM genres WHERE genre_name = $1",
-					[genreName]
-				);
+    // Convert chapter numbers to decimals
+    const lastChapterReadDecimal = lastChapterRead ? parseFloat(lastChapterRead) : 0;
+    const latestChapterDecimal = latestChapter ? parseFloat(latestChapter) : 0;
 
-				let genreId;
-				if (!genreCheck.rows.length) {
-					// Insert new genre
-					const newGenre = await db.query(
-						"INSERT INTO genres (genre_name) VALUES ($1) RETURNING genre_id",
-						[genreName]
-					);
+    // Ensure required fields are present
+    if (!title) {
+      return res.status(400).json({
+        error: "Title is required",
+        details: "No title was provided in the request body",
+      });
+    }
 
-					genreId = newGenre.rows[0].genre_id;
-				} else {
-					genreId = genreCheck.rows[0].genre_id;
-				}
+    // Start transaction
+    await db.query("BEGIN");
 
-				// Create relationship in join table
-				await db.query(
-					"INSERT INTO mangagenres (manga_id, genre_id) VALUES ($1, $2)",
-					[mangaId, genreId]
-				);
-			}
-		}
+    // Insert manga into the 'manga' table
+    const mangaResult = await db.query(
+      `INSERT INTO manga (
+        title, 
+        description,
+        cover_art_url,
+        status,
+        latest_chapter,
+        latest_chapter_date,
+        tier,
+        record_created
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
+      RETURNING manga_id`,
+      [
+        title,
+        description || null,
+        image || null,
+        status || null,
+        latestChapterDecimal,
+        latestChapterDate || null,
+        tier || null
+      ]
+    );
 
-		await db.query("COMMIT"); // Commit the transaction
+    const mangaId = mangaResult.rows[0].manga_id;
 
-		res.json({
-			success: true,
-			manga_id: mangaId,
-		});
-	} catch (error) {
-		await db.query("ROLLBACK"); // Rollback on error
-		console.error("DB error:", error);
-		res.status(500).json({
-			error: "Failed to add manga",
-			details: error.message,
-			stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
-		});
-	}
+    // Insert manga into the watchlist with decimal chapter and favorite status
+    await db.query(
+      `INSERT INTO watchlist (
+        manga_id,
+        last_chapter_read,
+        date_added_to_watchlist,
+        favorite
+      ) VALUES ($1, $2, NOW(), $3)`,
+      [mangaId, lastChapterReadDecimal, favorite || false]
+    );
+
+    // If manga has a status "WatchList", add it to the watchlist and update is_watched to true
+    if (status === "WatchList") {
+      try {
+        await db.query(
+          `UPDATE watchlist
+           SET is_watched = true
+           WHERE manga_id = $1`,
+          [mangaId]
+        );
+      } catch (error) {
+        console.error("Error updating watchlist or is_watched:", error);
+        res.status(500).json({
+          error: "Failed to add manga to watchlist or update is_watched",
+          details: error.message,
+        });
+      }
+    }
+
+    // Insert genres if provided
+    if (genres && genres.length > 0) {
+      for (const genreName of genres) {
+        const genreCheck = await db.query(
+          "SELECT genre_id FROM genres WHERE genre_name = $1",
+          [genreName]
+        );
+
+        let genreId;
+        if (!genreCheck.rows.length) {
+          const newGenre = await db.query(
+            "INSERT INTO genres (genre_name) VALUES ($1) RETURNING genre_id",
+            [genreName]
+          );
+          genreId = newGenre.rows[0].genre_id;
+        } else {
+          genreId = genreCheck.rows[0].genre_id;
+        }
+
+        await db.query(
+          "INSERT INTO mangagenres (manga_id, genre_id) VALUES ($1, $2)",
+          [mangaId, genreId]
+        );
+      }
+    }
+
+    await db.query("COMMIT");
+
+    res.json({
+      success: true,
+      manga_id: mangaId,
+    });
+  } catch (error) {
+    await db.query("ROLLBACK");
+    console.error("DB error:", error);
+    res.status(500).json({
+      error: "Failed to add manga",
+      details: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
+  }
 });
-
 // Route to update manga details
 app.patch("/api/manga/:manga_id", async (req, res) => {
 	try {
-		const { manga_id } = req.params;
-		const updates = req.body;
-
-		// Validate manga_id exists
-		if (!manga_id) {
-			return res.status(400).json({
-				error: "Manga ID is required",
-				details: "No manga_id was provided in the URL parameters",
-			});
-		}
-
-		// Validate there are updates to make
-		if (!updates || Object.keys(updates).length === 0) {
-			return res.status(400).json({
-				error: "No updates provided",
-				details: "Request body must contain at least one field to update",
-			});
-		}
-
-		await db.query("BEGIN"); // Start transaction
-
-		// Check if manga exists
-		const mangaCheck = await db.query(
-			"SELECT manga_id FROM manga WHERE manga_id = $1",
-			[manga_id]
-		);
-
-		if (!mangaCheck.rows.length) {
-			await db.query("ROLLBACK");
-			return res.status(404).json({
-				error: "Manga not found",
-				details: `No manga found with ID ${manga_id}`,
-			});
-		}
-
-		// Fields that can be updated in the manga table
-		const mangaFields = [
-			"title",
-			"description",
-			"cover_art_url",
-			"status",
-			"latest_chapter",
-			"latest_chapter_date",
-		];
-
-		// Fields that update the watchlist table
-		const watchlistFields = ["last_chapter_read"];
-
-		// Build manga updates
-		const mangaUpdates = {};
-		for (const field of mangaFields) {
-			if (updates[field] !== undefined) {
-				mangaUpdates[field] = updates[field];
-			}
-		}
-
-		// Build watchlist updates
-		const watchlistUpdates = {};
-		for (const field of watchlistFields) {
-			if (updates[field] !== undefined) {
-				watchlistUpdates[field] = updates[field];
-			}
-		}
-
-		// Update manga table if needed
-		if (Object.keys(mangaUpdates).length > 0) {
-			const setClause = Object.keys(mangaUpdates)
-				.map((key, i) => `${key} = $${i + 1}`)
-				.join(", ");
-
-			const values = Object.values(mangaUpdates);
-			values.push(manga_id);
-
-			await db.query(
-				`UPDATE manga 
-         SET ${setClause}, record_updated_date = NOW()
-         WHERE manga_id = $${values.length}`,
-				values
-			);
-
-			// Special handling for status changes to WatchList
-			if (mangaUpdates.status === "WatchList") {
-				await db.query(
-					`UPDATE watchlist
-           SET is_watched = true
-           WHERE manga_id = $1`,
-					[manga_id]
-				);
-			} else if (mangaUpdates.status && mangaUpdates.status !== "WatchList") {
-				await db.query(
-					`UPDATE watchlist
-           SET is_watched = false
-           WHERE manga_id = $1`,
-					[manga_id]
-				);
-			}
-		}
-
-		// Update watchlist table if needed
-		if (Object.keys(watchlistUpdates).length > 0) {
-			const setClause = Object.keys(watchlistUpdates)
-				.map((key, i) => `${key} = $${i + 1}`)
-				.join(", ");
-
-			const values = Object.values(watchlistUpdates);
-			values.push(manga_id);
-
-			await db.query(
-				`UPDATE watchlist 
-         SET ${setClause}
-         WHERE manga_id = $${values.length}`,
-				values
-			);
-		}
-
-		// Handle genre updates if provided
-		if (updates.genres !== undefined) {
-			// First, clear existing genres
-			await db.query("DELETE FROM mangagenres WHERE manga_id = $1", [manga_id]);
-
-			// Then add new genres if provided
-			if (updates.genres && updates.genres.length > 0) {
-				for (const genreName of updates.genres) {
-					// Check if genre exists
-					const genreCheck = await db.query(
-						"SELECT genre_id FROM genres WHERE genre_name = $1",
-						[genreName]
-					);
-
-					let genreId;
-					if (!genreCheck.rows.length) {
-						// Insert new genre
-						const newGenre = await db.query(
-							"INSERT INTO genres (genre_name) VALUES ($1) RETURNING genre_id",
-							[genreName]
-						);
-						genreId = newGenre.rows[0].genre_id;
-					} else {
-						genreId = genreCheck.rows[0].genre_id;
-					}
-
-					// Create relationship
-					await db.query(
-						"INSERT INTO mangagenres (manga_id, genre_id) VALUES ($1, $2)",
-						[manga_id, genreId]
-					);
-				}
-			}
-		}
-
-		await db.query("COMMIT"); // Commit transaction
-
-		// Return the updated manga data
-		const updatedManga = await db.query(
-			`SELECT m.*, 
-              w.last_chapter_read,
-              w.date_added_to_watchlist,
-              w.is_watched,
-              ARRAY(SELECT g.genre_name 
-                    FROM genres g
-                    JOIN mangagenres mg ON g.genre_id = mg.genre_id
-                    WHERE mg.manga_id = m.manga_id) as genres
-       FROM manga m
-       LEFT JOIN watchlist w ON m.manga_id = w.manga_id
-       WHERE m.manga_id = $1`,
-			[manga_id]
-		);
-
-		res.json({
-			success: true,
-			manga: updatedManga.rows[0],
+	  const { manga_id } = req.params;
+	  const updates = req.body;
+  
+	  if (!manga_id) {
+		return res.status(400).json({
+		  error: "Manga ID is required",
+		  details: "No manga_id was provided in the URL parameters",
 		});
-	} catch (error) {
+	  }
+  
+	  if (!updates || Object.keys(updates).length === 0) {
+		return res.status(400).json({
+		  error: "No updates provided",
+		  details: "Request body must contain at least one field to update",
+		});
+	  }
+  
+	  await db.query("BEGIN");
+  
+	  const mangaCheck = await db.query(
+		"SELECT manga_id FROM manga WHERE manga_id = $1",
+		[manga_id]
+	  );
+  
+	  if (!mangaCheck.rows.length) {
 		await db.query("ROLLBACK");
-		console.error("Update error:", error);
-		res.status(500).json({
-			error: "Failed to update manga",
-			details: error.message,
-			stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+		return res.status(404).json({
+		  error: "Manga not found",
+		  details: `No manga found with ID ${manga_id}`,
 		});
+	  }
+  
+	  const mangaFields = [
+		"title",
+		"description",
+		"cover_art_url",
+		"status",
+		"latest_chapter",
+		"latest_chapter_date",
+	  ];
+  
+	  const watchlistFields = ["last_chapter_read", "favorite"];
+  
+	  const mangaUpdates = {};
+	  for (const field of mangaFields) {
+		if (updates[field] !== undefined) {
+		  mangaUpdates[field] = updates[field];
+		}
+	  }
+  
+	  const watchlistUpdates = {};
+	  for (const field of watchlistFields) {
+		if (updates[field] !== undefined) {
+		  watchlistUpdates[field] = updates[field];
+		}
+	  }
+  
+	  // === Update manga table ===
+	  if (Object.keys(mangaUpdates).length > 0) {
+		const keys = Object.keys(mangaUpdates);
+		const values = Object.values(mangaUpdates);
+  
+		const setClause = keys
+		  .map((key, i) => `${key} = $${i + 1}`)
+		  .join(", ");
+  
+		const fullSetClause = setClause
+		  ? `${setClause}, record_updated_date = NOW()`
+		  : "record_updated_date = NOW()";
+  
+		values.push(manga_id);
+  
+		await db.query(
+		  `UPDATE manga 
+		   SET ${fullSetClause}
+		   WHERE manga_id = $${values.length}`,
+		  values
+		);
+  
+		// Update is_watched status based on manga status
+		if (mangaUpdates.status === "WatchList") {
+		  await db.query(
+			`UPDATE watchlist
+			 SET is_watched = true
+			 WHERE manga_id = $1`,
+			[manga_id]
+		  );
+		} else if (mangaUpdates.status) {
+		  await db.query(
+			`UPDATE watchlist
+			 SET is_watched = false
+			 WHERE manga_id = $1`,
+			[manga_id]
+		  );
+		}
+	  }
+  
+	  // === Update watchlist table ===
+	  if (Object.keys(watchlistUpdates).length > 0) {
+		const keys = Object.keys(watchlistUpdates);
+		const values = Object.values(watchlistUpdates);
+  
+		const setClause = keys
+		  .map((key, i) => `${key} = $${i + 1}`)
+		  .join(", ");
+  
+		values.push(manga_id);
+  
+		await db.query(
+		  `UPDATE watchlist 
+		   SET ${setClause}
+		   WHERE manga_id = $${values.length}`,
+		  values
+		);
+	  }
+  
+	  // === Handle genres ===
+	  if (updates.genres !== undefined) {
+		await db.query("DELETE FROM mangagenres WHERE manga_id = $1", [manga_id]);
+  
+		if (Array.isArray(updates.genres) && updates.genres.length > 0) {
+		  for (const genreName of updates.genres) {
+			const genreCheck = await db.query(
+			  "SELECT genre_id FROM genres WHERE genre_name = $1",
+			  [genreName]
+			);
+  
+			let genreId;
+			if (!genreCheck.rows.length) {
+			  const newGenre = await db.query(
+				"INSERT INTO genres (genre_name) VALUES ($1) RETURNING genre_id",
+				[genreName]
+			  );
+			  genreId = newGenre.rows[0].genre_id;
+			} else {
+			  genreId = genreCheck.rows[0].genre_id;
+			}
+  
+			await db.query(
+			  "INSERT INTO mangagenres (manga_id, genre_id) VALUES ($1, $2)",
+			  [manga_id, genreId]
+			);
+		  }
+		}
+	  }
+  
+	  await db.query("COMMIT");
+  
+	  const updatedManga = await db.query(
+		`SELECT m.*, 
+		  w.last_chapter_read,
+		  w.date_added_to_watchlist,
+		  w.is_watched,
+		  w.favorite,
+		  ARRAY(
+			SELECT g.genre_name 
+			FROM genres g
+			JOIN mangagenres mg ON g.genre_id = mg.genre_id
+			WHERE mg.manga_id = m.manga_id
+		  ) AS genres
+		 FROM manga m
+		 LEFT JOIN watchlist w ON m.manga_id = w.manga_id
+		 WHERE m.manga_id = $1`,
+		[manga_id]
+	  );
+  
+	  res.json({
+		success: true,
+		manga: updatedManga.rows[0],
+	  });
+	} catch (error) {
+	  await db.query("ROLLBACK");
+	  console.error("Update error:", error);
+	  res.status(500).json({
+		error: "Failed to update manga",
+		details: error.message,
+		stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+	  });
 	}
-});
+  });
+  
 
-// Updated GET endpoint with search functionality
+// Updated GET endpoint with search functionality + favorites
 app.get("/api/manga", async (req, res) => {
+	console.log("Incoming request to /api/manga with query:", req.query);
 
-	console.log("Incoming request to /api/manga with query:", req.query); // ← Add this
 	try {
 		const {
 			page = 1,
@@ -379,14 +373,13 @@ app.get("/api/manga", async (req, res) => {
 			genres = "",
 			min_chapters = 0,
 			sort = "newest",
-			search = "", // New search parameter
+			search = "",
 		} = req.query;
 
 		const offset = (page - 1) * limit;
 		const genreList = genres ? genres.split(",") : [];
 		const minChaptersNum = Number(min_chapters) || 0;
 
-		// Sorting options
 		const sortOptions = {
 			"a-z": { field: "m.title", order: "ASC" },
 			newest: { field: "m.record_created", order: "DESC" },
@@ -402,67 +395,63 @@ app.get("/api/manga", async (req, res) => {
 		const currentSort = sortOptions[sort] || sortOptions.newest;
 
 		let query = `
-		SELECT 
-		  m.manga_id,
-		  m.title,
-		  m.alternative_title,
-		  m.cover_art_url,
-		  m.description,
-		  m.status,
-		  m.tier,
-		  CASE 
-			WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
-			ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
-		  END as latest_chapter,
-		  m.latest_chapter_date,
-		  CASE 
-			WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
-			ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
-		  END as last_chapter_read,
-		  w.date_added_to_watchlist,
-		  COUNT(*) OVER() as total_count
-		FROM manga m
-		LEFT JOIN watchlist w ON m.manga_id = w.manga_id
-	  `;
+			SELECT 
+				m.manga_id,
+				m.title,
+				m.alternative_title,
+				m.cover_art_url,
+				m.description,
+				m.status,
+				m.tier,
+				CASE 
+					WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
+					ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
+				END as latest_chapter,
+				m.latest_chapter_date,
+				CASE 
+					WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
+					ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
+				END as last_chapter_read,
+				w.date_added_to_watchlist,
+				w.favorite,  -- ✅ Added favorite field
+				COUNT(*) OVER() as total_count
+			FROM manga m
+			LEFT JOIN watchlist w ON m.manga_id = w.manga_id
+		`;
 
 		const whereClauses = [];
 		const queryParams = [];
 
-		// Add search condition (searches title, alternative title, and description)
 		if (search) {
 			whereClauses.push(`
-        (m.title ILIKE $${queryParams.length + 1} OR 
-         m.alternative_title ILIKE $${queryParams.length + 1} OR
-         m.description ILIKE $${queryParams.length + 1})
-      `);
+				(m.title ILIKE $${queryParams.length + 1} OR 
+				m.alternative_title ILIKE $${queryParams.length + 1} OR
+				m.description ILIKE $${queryParams.length + 1})
+			`);
 			queryParams.push(`%${search}%`);
 		}
 
-		// Add genre filter
 		if (genreList.length > 0) {
 			whereClauses.push(`
-        m.manga_id IN (
-          SELECT mg.manga_id 
-          FROM mangagenres mg
-          JOIN genres g ON mg.genre_id = g.genre_id
-          WHERE g.genre_name = ANY($${queryParams.length + 1})
-        )
-      `);
+				m.manga_id IN (
+					SELECT mg.manga_id 
+					FROM mangagenres mg
+					JOIN genres g ON mg.genre_id = g.genre_id
+					WHERE g.genre_name = ANY($${queryParams.length + 1})
+				)
+			`);
 			queryParams.push(genreList);
 		}
 
-		// Add minimum chapters filter
 		if (minChaptersNum > 0) {
 			whereClauses.push(`m.latest_chapter >= $${queryParams.length + 1}`);
 			queryParams.push(minChaptersNum);
 		}
 
-		// Combine WHERE clauses if they exist
 		if (whereClauses.length > 0) {
 			query += " WHERE " + whereClauses.join(" AND ");
 		}
 
-		// Add sorting and pagination
 		query += ` ORDER BY ${currentSort.field} ${currentSort.order}`;
 		queryParams.push(limit, offset);
 		query += ` LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}`;
@@ -473,12 +462,12 @@ app.get("/api/manga", async (req, res) => {
 			success: true,
 			data: rows,
 			pagination: {
-			  page: Number(page),
-			  limit: Number(limit),
-			  total: rows[0]?.total_count || 0,
-			  totalPages: Math.ceil((rows[0]?.total_count || 0) / limit)
+				page: Number(page),
+				limit: Number(limit),
+				total: rows[0]?.total_count || 0,
+				totalPages: Math.ceil((rows[0]?.total_count || 0) / limit)
 			}
-		  });
+		});
 	} catch (err) {
 		console.error("Database error:", err);
 		res.status(500).json({
@@ -489,112 +478,139 @@ app.get("/api/manga", async (req, res) => {
 	}
 });
 
+
 // GET endpoint to retrieve user's watchlist
 app.get("/api/watchlist", async (req, res) => {
 	try {
-	  const { page = 1, limit = 10 } = req.query;
-	  const offset = (page - 1) * limit;
-  
-	  const query = `
-		SELECT 
-		  m.manga_id,
-		  m.title,
-		  m.alternative_title,
-		  m.cover_art_url,
-		  m.description,
-		  m.status,
-		  m.tier,
-		  CASE 
-			WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
-			ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
-		  END as latest_chapter,
-		  m.latest_chapter_date,
-		  CASE 
-			WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
-			ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
-		  END as last_chapter_read,
-		  w.date_added_to_watchlist,
-		  w.is_watched,
-		  COUNT(*) OVER() as total_count
-		FROM manga m
-		JOIN watchlist w ON m.manga_id = w.manga_id
-		WHERE w.is_watched = true
-		ORDER BY w.date_added_to_watchlist DESC
-		LIMIT $1 OFFSET $2
-	  `;
-  
-	  const { rows } = await db.query(query, [limit, offset]);
-  
-	  res.json({
-		success: true,
-		data: rows,
-		pagination: {
-		  page: Number(page),
-		  limit: Number(limit),
-		  total: rows[0]?.total_count || 0,
-		},
-	  });
-	} catch (err) {
-	  console.error("Database error:", err);
-	  res.status(500).json({
-		success: false,
-		error: "Failed to fetch watchlist",
-		details: process.env.NODE_ENV === "development" ? err.message : undefined,
-	  });
-	}
-  });
-  
-// GET endpoint for individual manga details by ID
-app.get("/api/manga/:id", async (req, res) => {
-	try {
-		const mangaId = req.params.id;
+		const { page = 1, limit = 10 } = req.query;
+		const offset = (page - 1) * limit;
 
-		// Fetch main manga info
-		const mangaQuery = `
-		SELECT 
-			m.*,
-			CASE 
-			WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
-			ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
-			END as last_chapter_read,
-			w.date_added_to_watchlist,
-			CASE 
-			WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
-			ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
-			END as latest_chapter
-		FROM manga m
-		LEFT JOIN watchlist w ON m.manga_id = w.manga_id
-		WHERE m.manga_id = $1
+		const query = `
+			SELECT 
+				m.manga_id,
+				m.title,
+				m.alternative_title,
+				m.cover_art_url,
+				m.description,
+				m.status,
+				m.tier,
+				CASE 
+					WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
+					ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
+				END as latest_chapter,
+				m.latest_chapter_date,
+				CASE 
+					WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
+					ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
+				END as last_chapter_read,
+				w.date_added_to_watchlist,
+				w.is_watched,
+				w.favorite, -- ← Include favorite here
+				COUNT(*) OVER() as total_count
+			FROM manga m
+			JOIN watchlist w ON m.manga_id = w.manga_id
+			WHERE w.is_watched = true
+			ORDER BY w.date_added_to_watchlist DESC
+			LIMIT $1 OFFSET $2
 		`;
 
-		const mangaResult = await db.query(mangaQuery, [mangaId]);
-
-		if (mangaResult.rows.length === 0) {
-			return res.status(404).json({ error: "Manga not found" });
-		}
-
-		// Fetch genres
-		const genresQuery = `
-      SELECT g.genre_id, g.genre_name
-      FROM genres g
-      JOIN mangagenres mg ON g.genre_id = mg.genre_id
-      WHERE mg.manga_id = $1
-    `;
-
-		const genresResult = await db.query(genresQuery, [mangaId]);
+		const { rows } = await db.query(query, [limit, offset]);
 
 		res.json({
-			...mangaResult.rows[0],
-			genres: genresResult.rows,
+			success: true,
+			data: rows,
+			pagination: {
+				page: Number(page),
+				limit: Number(limit),
+				total: rows[0]?.total_count || 0,
+			},
 		});
 	} catch (err) {
 		console.error("Database error:", err);
 		res.status(500).json({
-			error: "Failed to fetch manga details",
+			success: false,
+			error: "Failed to fetch watchlist",
 			details: process.env.NODE_ENV === "development" ? err.message : undefined,
 		});
 	}
 });
+
+// GET endpoint for individual manga details by ID
+app.get("/api/manga/:id", async (req, res) => {
+	try {
+	  const mangaId = req.params.id;
+  
+	  // Fetch main manga info with favorite status
+	  const mangaQuery = `
+		SELECT 
+		  m.manga_id,
+		  m.title,
+		  m.alternative_title,
+		  m.description,
+		  m.cover_art_url,
+		  m.status,
+		  m.tier,
+		  m.latest_chapter,
+		  m.latest_chapter_date,
+		  m.year_published,
+		  m.record_created,
+		  m.record_updated_date,
+		  w.favorite,
+		  w.last_chapter_read,
+		  w.date_added_to_watchlist,
+		  w.is_watched,
+		  CASE 
+			WHEN COALESCE(w.last_chapter_read, 0) % 1 = 0 THEN COALESCE(w.last_chapter_read, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(w.last_chapter_read, 0)::text)
+		  END as formatted_last_chapter_read,
+		  CASE 
+			WHEN COALESCE(m.latest_chapter, 0) % 1 = 0 THEN COALESCE(m.latest_chapter, 0)::integer::text
+			ELSE TRIM(TRAILING '0' FROM COALESCE(m.latest_chapter, 0)::text)
+		  END as formatted_latest_chapter
+		FROM manga m
+		LEFT JOIN watchlist w ON m.manga_id = w.manga_id
+		WHERE m.manga_id = $1
+	  `;
+  
+	  const mangaResult = await db.query(mangaQuery, [mangaId]);
+  
+	  if (mangaResult.rows.length === 0) {
+		return res.status(404).json({ error: "Manga not found" });
+	  }
+  
+	  // Fetch genres
+	  const genresQuery = `
+		SELECT g.genre_id, g.genre_name
+		FROM genres g
+		JOIN mangagenres mg ON g.genre_id = mg.genre_id
+		WHERE mg.manga_id = $1
+	  `;
+  
+	  const genresResult = await db.query(genresQuery, [mangaId]);
+  
+	  // Format the response
+	  const mangaData = mangaResult.rows[0];
+	  const response = {
+		...mangaData,
+		last_chapter_read: mangaData.formatted_last_chapter_read,
+		latest_chapter: mangaData.formatted_latest_chapter,
+		genres: genresResult.rows,
+		favorite: mangaData.favorite || false // Default to false if null
+	  };
+  
+	  // Remove temporary formatted fields
+	  delete response.formatted_last_chapter_read;
+	  delete response.formatted_latest_chapter;
+  
+	  res.json(response);
+	} catch (err) {
+	  console.error("Database error:", err);
+	  res.status(500).json({
+		error: "Failed to fetch manga details",
+		details: process.env.NODE_ENV === "development" ? err.message : undefined,
+	  });
+	}
+  });
 
 // DELETE endpoint to remove manga by ID
 app.delete("/api/manga/:id", async (req, res) => {

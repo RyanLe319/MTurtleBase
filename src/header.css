@@ -2,14 +2,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: #ffffff;
-  box-shadow: 
-
-     0  2px 4px rgba(0, 0, 0, 0.05);  /* bottom */
+  padding: 2rem 2rem;
+  background: #d8e6f5; /* Mix of your #e0e0e0 and #b0d2f7 */
+  border-bottom: 1px solid #b0d2f7;
   position: relative;
+  margin-bottom: 1px;
 }
-
 
 .left-group {
   flex: 1; /* Takes up available space */
@@ -18,11 +16,13 @@
 }
 
 .title {
+  font-family: "Cascadia Code", sans-serif;
+
   display: flex;
   flex: 1;
-  padding-left: 125px;
+  padding-left: 70px;
+  font-size: 3rem; 
 }
-
 
 .right-group {
   display: flex;
@@ -33,6 +33,7 @@
 
 .search-container {
   width: 100%;
+  position: relative; /* Needed for absolute positioning of dropdown */
 }
 
 @media (max-width: 768px) {
@@ -47,30 +48,33 @@
     padding-left: 1px;
   }
   
-  
   .right-group {
     width: 100%;
   }
 }
 
-
-
 .MuiInput-underline:after {
   border-bottom-color: #b0d2f7 !important;
 }
 
-/* Search icon color */
+/* Search icon color and increased size */
 .search-container .MuiSvgIcon-root {
+  font-size: 45px; /* Increased from default size */
   color: #b0d2f7;
-  
 }
 
-/* Focus state for the search field */
+/* Focus state for the search icon */
 .search-container .Mui-focused .MuiSvgIcon-root {
   color: #b0d2f7;
 }
 
-.search-container {
-  position: relative; /* Needed for absolute positioning of dropdown */
-  width: 100%;
+/* Increase placeholder text size */
+.search-container input::placeholder {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+/* Increase input text size for consistency */
+.search-container input {
+  font-size: 1.5rem;
 }

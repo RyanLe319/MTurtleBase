@@ -285,25 +285,27 @@ color: inherit;
 }
 
 /* Different colors for each status */
+
 .status-badge[data-status="Ongoing"] {
-background-color: #1976d2;
-color: white;
+  background-color: #1e88e5; /* A bright blue, close to style guide but different */
+  color: white;
 }
 
 .status-badge[data-status="Completed"] {
-background-color: #4caf50;
-color: white;
+  background-color: #388e3c; /* A strong green, complements #4caf50 but more vibrant */
+  color: white;
 }
 
 .status-badge[data-status="WatchList"] {
-background-color: #ff9800;
-color: white;
+  background-color: #ffb300; /* A rich amber/gold, stands out without being red */
+  color: white;
 }
 
 .status-badge[data-status="Dropped"] {
-background-color: #f44336;
-color: white;
+  background-color: #212121; /* A dark charcoal black, sharp but readable */
+  color: white;
 }
+
 
 /* Editing field specific styles for status */
 .status-badge .editing-field {
@@ -359,3 +361,4 @@ background: transparent;
 .cover-art:hover img {
   opacity: 0.9;
 }
+

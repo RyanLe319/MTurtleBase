@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import MangaGrid from './MangaGrid';
 import PaginationControls from './PaginationControls';
+import SortBy from './SortBy';
+import GenreList from './GenreList';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import './watchListPage.css';
 
@@ -50,11 +52,25 @@ function WatchListPage() {
   return (
     <div className="watchlist-container">
       <h1>Your Watchlist</h1>
+      
+      <div className="watchlist-filters">
+        <GenreList 
+          onSubmitData={(data) => setFilterData(prev => ({...prev, ...data}))}
+          initialGenres={filterData.selectedGenres}
+          initialMinChapters={filterData.minChapters}
+        />
+        <SortBy 
+          currentSort={filterData.currentSort} 
+          onSortChange={(sort) => setFilterData(prev => ({...prev, currentSort: sort}))}
+        />
+      </div>
+      
       <MangaGrid 
         currentPage={currentPage} 
         isWatchlist={true}
         filterData={filterData}
       />
+      
       <PaginationControls
         currentPage={currentPage}
         totalPages={totalPages}

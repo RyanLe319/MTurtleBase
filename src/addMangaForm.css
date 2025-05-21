@@ -362,3 +362,34 @@
   border-color: #b0d2f7;
 }
 
+/* Favorite Toggle Styles */
+.favorite-toggle {
+  display: flex;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.favorite-toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.favorite-toggle-btn.active {
+  background: #b0d2f7;
+  color: #000;
+  font-weight: 500;
+}
+
+.favorite-toggle-btn:first-child {
+  border-right: 1px solid #ddd;
+}
+
+.favorite-toggle-btn:hover:not(.active) {
+  background: #e0e0e0;
+}

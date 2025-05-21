@@ -12,6 +12,7 @@ function AddMangaForm({ isOpen, onClose, onSuccess }) {
     description: "",
     image: "",
     tier: "",
+    favorite: false,
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -380,6 +381,28 @@ function AddMangaForm({ isOpen, onClose, onSuccess }) {
               <option value="WatchList">WatchList</option>
               <option value="Dropped">Dropped</option>
             </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="favorite">Favorite</label>
+            <div className="favorite-toggle">
+              <button
+                type="button"
+                className={`favorite-toggle-btn ${formData.favorite ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({...prev, favorite: true}))}
+                disabled={isSubmitting}
+              >
+                Add to Favorites
+              </button>
+              <button
+                type="button"
+                className={`favorite-toggle-btn ${!formData.favorite ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({...prev, favorite: false}))}
+                disabled={isSubmitting}
+              >
+                Not Favorited
+              </button>
+            </div>
           </div>
 
           <div className="form-group">

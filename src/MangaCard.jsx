@@ -8,6 +8,7 @@ import Rating from './Rating.jsx'
 
 
 function MangaCard({ manga , onDeleteSuccess }) {
+  console.log('Manga favorited status:', manga.favorite, manga.title);
 
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [isDeleting, setIsDeleting] = useState(false);
@@ -78,7 +79,7 @@ function MangaCard({ manga , onDeleteSuccess }) {
 
 
   return (
-    <div className="manga-card">
+    <div className={`manga-card ${manga.favorite ? 'favorite' : ''}`} >
       <div className="manga-card-image">
         <img 
           src={manga.cover_art_url || "https://media1.tenor.com/m/UNpuEsjDH_MAAAAC/one-piece-one-piece-zoro.gif"} 
@@ -89,7 +90,12 @@ function MangaCard({ manga , onDeleteSuccess }) {
         />
       </div>
       <div className="manga-card-info">
-        <div className="corner-badge">{manga.status}</div>
+        <div 
+            className={`corner-badge status`} 
+            data-status={manga.status}
+          >
+            {manga.status}
+          </div>
         <div className="title-group">
           <Link to={`/mangadetails/${manga.manga_id}`} className="main-title">{manga.title}</Link>
           {manga.alternative_title && (
@@ -151,6 +157,7 @@ MangaCard.propTypes = {
     alternative_title: PropTypes.string,
     cover_art_url: PropTypes.string,
     status: PropTypes.string,
+    favorited: PropTypes.bool,
     description: PropTypes.string,
     latest_chapter: PropTypes.number,
     latest_chapter_date: PropTypes.string,

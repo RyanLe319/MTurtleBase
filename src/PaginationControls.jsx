@@ -16,13 +16,30 @@ function PaginationControls({
   itemsPerPage,
   onItemsPerPageChange 
 }) {
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo(0, 0); // Instant jump
+    // Alternative: document.documentElement.scrollTop = 0;
+  };
+
+  // Wrapped handlers with scroll to top
+  const handlePageChange = (page) => {
+    onPageChange(page);
+    scrollToTop();
+  };
+
+  const handleItemsPerPageChange = (value) => {
+    onItemsPerPageChange(value);
+    scrollToTop();
+  };
+
   return (
     <div className="pagination-container">
       <div className="items-per-page-container">
         <span>Show:</span>
         <select
           value={itemsPerPage}
-          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+          onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
           className="items-per-page-selector"
         >
           <option value="20">20</option>
@@ -34,7 +51,7 @@ function PaginationControls({
       {/* First Page Button */}
       <button 
         className="pagination-btn first-last-btn"
-        onClick={() => onPageChange(1)}
+        onClick={() => handlePageChange(1)}
         disabled={currentPage === 1}
       >
         <FirstPage />
@@ -43,7 +60,7 @@ function PaginationControls({
 
       <button 
         className="pagination-btn"
-        onClick={() => onPageChange(Math.max(1, currentPage - 2))}
+        onClick={() => handlePageChange(Math.max(1, currentPage - 2))}
         disabled={currentPage <= 1}
       >
         <KeyboardDoubleArrowLeft />
@@ -51,7 +68,7 @@ function PaginationControls({
 
       <button 
         className="pagination-btn"
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage <= 1}
       >
         <KeyboardArrowLeft />
@@ -63,7 +80,7 @@ function PaginationControls({
 
       <button 
         className="pagination-btn"
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
       >
         <KeyboardArrowRight />
@@ -71,7 +88,7 @@ function PaginationControls({
 
       <button 
         className="pagination-btn"
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 2))}
+        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 2))}
         disabled={currentPage >= totalPages}
       >
         <KeyboardDoubleArrowRight />
@@ -80,7 +97,7 @@ function PaginationControls({
       {/* Last Page Button */}
       <button 
         className="pagination-btn first-last-btn"
-        onClick={() => onPageChange(totalPages)}
+        onClick={() => handlePageChange(totalPages)}
         disabled={currentPage === totalPages}
       >
         <span>Last</span>
