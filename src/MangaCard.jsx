@@ -4,11 +4,12 @@ import "./mangaCard0.css";
 import { Link } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import StarIcon from '@mui/icons-material/Star';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import Rating from './Rating.jsx'
 
 
-function MangaCard({ manga , onDeleteSuccess }) {
-  console.log('Manga favorited status:', manga.favorite, manga.title);
+function MangaCard({ manga , onDeleteSuccess, onToggleSuccess }) {
 
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [isDeleting, setIsDeleting] = useState(false);
@@ -77,6 +78,33 @@ function MangaCard({ manga , onDeleteSuccess }) {
     }
   };
 
+  const handleToggle = async (field) => {
+    console.log(`Toggling ${field} for manga ${manga.manga_id}`, {
+      field,
+      value: !manga[field]
+    });
+    try {
+      const response = await fetch(`${BASE_URL}/api/manga/${manga.manga_id}/toggles`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          field, 
+          value: !manga[field]  // send opposite of current value
+        }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to update status");
+  
+      // Notify parent to update local state
+      if (onToggleSuccess) onToggleSuccess(manga.manga_id, field);
+    } catch (err) {
+      console.error(`Error toggling ${field}:`, err);
+    }
+  };
+  
+
 
   return (
     <div className={`manga-card ${manga.favorite ? 'favorite' : ''}`} >
@@ -130,6 +158,19 @@ function MangaCard({ manga , onDeleteSuccess }) {
             />
           </div>
           <div className="button-group">
+          <button 
+            className={`star ${manga.favorite ? 'active' : ''}`}
+            onClick={() => handleToggle('favorite')}
+          >
+            <StarIcon />
+          </button>
+
+          <button 
+            className={`bookmark ${manga.read_list ? 'active' : ''}`}
+            onClick={() => handleToggle('read_list')}
+          >
+            <BookmarkIcon style={{ color: manga.read_list ? '#1565c0' : '#333' }} />
+          </button>
             <Link to={`/mangadetails/${manga.manga_id}`} className="edit">
               <button><EditIcon /></button>
             </Link>
@@ -159,7 +200,7 @@ MangaCard.propTypes = {
     alternative_title: PropTypes.string,
     cover_art_url: PropTypes.string,
     status: PropTypes.string,
-    favorited: PropTypes.bool,
+    favorite: PropTypes.bool,
     description: PropTypes.string,
     latest_chapter: PropTypes.number,
     latest_chapter_date: PropTypes.string,

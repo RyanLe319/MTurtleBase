@@ -148,6 +148,21 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false,  isFavorite =
     );
   }
 
+  const handleToggleSuccess = (mangaId, field) => {
+    setMangaList((prevList) =>
+      prevList.map((m) => {
+        if (m.manga_id === mangaId) {
+          return {
+            ...m,
+            [field]: !m[field],  // toggle boolean field
+          };
+        }
+        return m;
+      })
+    );
+  };
+  
+
  
 
   return (
@@ -158,6 +173,7 @@ function MangaGrid({ currentPage, filterData, isWatchlist = false,  isFavorite =
           key={manga.manga_id}
           manga={manga}
           onDeleteSuccess={handleDeleteSuccess}
+          onToggleSuccess={handleToggleSuccess}
         />
       ))}
     </div>

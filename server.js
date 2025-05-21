@@ -416,6 +416,7 @@ app.get("/api/manga", async (req, res) => {
 				END as last_chapter_read,
 				w.date_added_to_watchlist,
 				w.favorite,  -- ✅ Added favorite field
+				w.read_list,
 				COUNT(*) OVER() as total_count
 			FROM manga m
 			LEFT JOIN watchlist w ON m.manga_id = w.manga_id
@@ -931,6 +932,41 @@ app.patch("/api/manga/:id/tier", async (req, res) => {
 	}
   });
 
+  app.patch("/api/manga/:id/toggles", async (req, res) => {
+	try {
+	  const mangaId = parseInt(req.params.id, 10);
+	  const { field, value } = req.body;
+	  console.log("This is MANGAID AND WHAT NOT", {field, value, mangaId});
+  
+	  if (!['favorite', 'read_list'].includes(field)) {
+		return res.status(400).json({ error: "Invalid field specified" });
+	  }
+  
+	  console.log(`Updating mangaId ${mangaId}, setting ${field} = ${value}`);
+  
+	  const updateQuery = `
+		UPDATE watchlist
+		SET ${field} = $2
+		WHERE manga_id = $1
+		RETURNING ${field}
+	  `;
+	  const updateResult = await db.query(updateQuery, [mangaId, value]);
+  
+	  if (updateResult.rowCount === 0) {
+		return res.status(404).json({ error: "Manga not found in watchlist" });
+	  }
+  
+	  res.json({ [field]: updateResult.rows[0][field] });
+	} catch (err) {
+	  console.error("Database error:", err);
+	  res.status(500).json({
+		error: "Failed to update watchlist status",
+		details: process.env.NODE_ENV === "development" ? err.message : undefined,
+	  });
+	}
+  });
+  
+  
 // Serve static files from the dist directory (Vite output)
 app.use(express.static(path.join(__dirname, 'dist')));
 
