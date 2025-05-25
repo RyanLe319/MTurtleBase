@@ -3,7 +3,6 @@
 
 A full-stack application for organizing and tracking your manga collection with additional data from the MangaDex API.
 
-Link to website: https://mturtlebase-production-24d9.up.railway.app
 
 ## Features
 
